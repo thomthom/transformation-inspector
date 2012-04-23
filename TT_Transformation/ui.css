@@ -1,0 +1,93 @@
+html, input, select, textarea, button {
+  font-family: 'Segoe UI', 'Tahoma', sans-serif;
+  font-size: 1em;
+}
+
+html {
+  color: #333;
+  background: #fff;
+  overflow: hidden;
+  border: 0;
+}
+
+*
+{
+	cursor: default;
+}
+input
+{
+	cursor: auto;
+}
+
+button {
+  font-size: 0.8em;
+}
+
+h1 {
+  font-size: 1.5em;
+  font-weight: normal;
+  margin: 0.25em 0;
+}
+
+#entity {
+  margin: 0.75em 0 1em 1em;
+}
+#entity .klass {
+  font-weight: bold;
+}
+#entity .name {
+  font-style: italic;
+}
+
+.matrix {
+  margin-bottom: 1em;
+}
+.matrix th {
+  position: relative;
+}
+.matrix th button {
+  /*float: right;*/
+  position: absolute;
+  right: 0.5em;
+  top: 0.5em;
+}
+
+table {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /*background: #fee;*/
+}
+
+th {
+  background: #ddd;
+  padding: 0.5em 0;
+}
+
+td {
+  background: #eee;
+  padding: 0;
+}
+
+td input {
+  font-size: 0.8em;
+  text-align: center;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0.5em 0;
+  padding: 0.75em 0;
+}
+td input:hover {
+  background: #ffc;
+}
+td input:focus {
+  background: #fed;
+}
+
+td.rotate.scale {
+  background: #ded;
+}
+td.translation {
+  background: #dde;
+}
