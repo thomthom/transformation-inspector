@@ -45,10 +45,15 @@ h1 {
 .matrix th {
   position: relative;
 }
-.matrix th button {
-  /*float: right;*/
+
+button#resetEntity {
   position: absolute;
   right: 0.5em;
+  top: 0.5em;
+}
+button#applyEntity {
+  position: absolute;
+  left: 0.5em;
   top: 0.5em;
 }
 

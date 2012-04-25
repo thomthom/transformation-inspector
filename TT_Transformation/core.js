@@ -74,7 +74,14 @@ var UI = function() {
     },
     
     init_buttons : function() {
-      $('#matrixTransformation th button').click( function() {
+      $('#resetEntity').click( function() {
+        cache_transf = Geom.identity_transformation();
+        cache_changed();
+        update_sketchup_matrix();
+      });
+      
+      $('#applyEntity').click( function() {
+        cache_entity = cache_result;
         cache_transf = Geom.identity_transformation();
         cache_changed();
         update_sketchup_matrix();
@@ -139,7 +146,7 @@ var UI = function() {
     var $inputs = $table.find( 'input' );
     var index = $inputs.index( element );
     
-    var value = parseFloat( $(element).val() );
+    var value = parseFloat( $(element).val().replace(',', '.') );
     
     cache[ index ] = value;
     
