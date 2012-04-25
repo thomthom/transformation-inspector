@@ -120,7 +120,7 @@ module TT::Plugins::TransformationInspector
     end
   end
   
-  # @param [Object] bar
+  # @param [Hash] options
   #
   # @return [UI::WebDialog]
   # @since 1.0.0
@@ -157,6 +157,18 @@ module TT::Plugins::TransformationInspector
     window.add_action_callback( 'Window_Ready' ) { |dialog, params|
       #puts "Window_Ready()"
       self.selection_changed( Sketchup.active_model.selection )
+      self.observe_models
+    }
+    
+    window.set_on_close {
+      #puts 'Window Closing...'
+      # Detach observers.
+      if @app_observer
+        Sketchup.remove_observer( @app_observer )
+      end
+      if @selection_observer
+        Sketchup.active_model.selection.remove_observer( @selection_observer )
+      end
     }
     
     window.set_file( html_file )
@@ -164,6 +176,8 @@ module TT::Plugins::TransformationInspector
   end
   
   
+  # @param [Sketchup::Selection] selection
+  #
   # @since 1.0.0
   def self.selection_changed( selection )
     #puts "Selection Changed (#{selection.length})"
@@ -185,6 +199,8 @@ module TT::Plugins::TransformationInspector
   end
   
   
+  # @param [Sketchup::Model] model
+  #
   # @since 1.0.0
   def self.observe_selection( model )
     #puts '> Attaching Selection Observer'
@@ -225,6 +241,8 @@ module TT::Plugins::TransformationInspector
       selectionChanged( selection )
     end
     
+    # @param [Sketchup::Selection] selection
+    #
     # @since 1.0.0
     def selectionChanged( selection )
       #puts "\n[Event] Selection Changed (#{Time.now.to_i})"
@@ -234,29 +252,22 @@ module TT::Plugins::TransformationInspector
   end # class SelectionObserver
   
   
+  # @since 1.0.0
   class AppObserver < Sketchup::AppObserver
     
+    # @since 1.0.0
     def onNewModel( model )
       #puts 'onNewModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
     end
     
+    # @since 1.0.0
     def onOpenModel( model )
       #puts 'onOpenModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
     end
     
   end # class AppObserver
-  
-  
-  # Observe Model
-  self.observe_models
-  #puts 'Observing current model'
-  #@app_observer ||= AppObserver.new
-  #Sketchup.remove_observer( @app_observer ) if @app_observer
-  #Sketchup.add_observer( @app_observer )
-  #self.observe_selection( Sketchup.active_model )
-  #puts '---'
 
 
   
