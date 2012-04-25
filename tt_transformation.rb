@@ -34,7 +34,7 @@ module TT::Plugins::TransformationInspector
   # Plugin information
   PLUGIN_ID       = 'TT_Transformation'.freeze
   PLUGIN_NAME     = 'Transformation Inspector'.freeze
-  PLUGIN_VERSION  = TT::Version.new(1,0,0).freeze
+  PLUGIN_VERSION  = TT::Version.new(1,0,1).freeze
   
   # Version information
   RELEASE_DATE    = '25 Apr 12'.freeze
@@ -82,7 +82,7 @@ module TT::Plugins::TransformationInspector
       :version => PLUGIN_VERSION.to_s,
       :date => RELEASE_DATE,   
       :description => 'Inspect and modify the transformation matrix directly.',
-      :link_info => 'http://forums.sketchucation.com/viewtopic.php?f=0&t=0'
+      :link_info => 'http://forums.sketchucation.com/viewtopic.php?f=323&t=44859'
     }
   end
   
