@@ -37,7 +37,7 @@ module TT::Plugins::TransformationInspector
   PLUGIN_VERSION  = TT::Version.new(1,0,0).freeze
   
   # Version information
-  RELEASE_DATE    = '08 Apr 12'.freeze
+  RELEASE_DATE    = '25 Apr 12'.freeze
   
   # Resource paths
   PATH_ROOT   = File.dirname( __FILE__ ).freeze
@@ -135,7 +135,7 @@ module TT::Plugins::TransformationInspector
     window.set_size( width, height )
     
     window.add_action_callback( 'update_transformation' ) { |dialog, params|
-      puts "update_transformation()"
+      #puts "update_transformation()"
       #puts "update_transformation( #{params.inspect} )"
       arg1, arg2 = params.split('||')
       matrix = Geom::Transformation.new( eval( arg1 ) )
@@ -155,7 +155,7 @@ module TT::Plugins::TransformationInspector
     }
     
     window.add_action_callback( 'Window_Ready' ) { |dialog, params|
-      puts "Window_Ready()"
+      #puts "Window_Ready()"
       self.selection_changed( Sketchup.active_model.selection )
     }
     
@@ -164,6 +164,7 @@ module TT::Plugins::TransformationInspector
   end
   
   
+  # @since 1.0.0
   def self.selection_changed( selection )
     #puts "Selection Changed (#{selection.length})"
     if @window && @window.visible?
@@ -184,6 +185,7 @@ module TT::Plugins::TransformationInspector
   end
   
   
+  # @since 1.0.0
   def self.observe_selection( model )
     #puts '> Attaching Selection Observer'
     @selection_observer ||= SelectionObserver.new { |selection|
@@ -191,6 +193,17 @@ module TT::Plugins::TransformationInspector
     }
     model.selection.remove_observer( @selection_observer ) if @selection_observer
     model.selection.add_observer( @selection_observer )
+  end
+  
+  
+  # @since 1.0.0
+  def self.observe_models
+    #puts 'Observing current model'
+    @app_observer ||= AppObserver.new
+    Sketchup.remove_observer( @app_observer ) if @app_observer
+    Sketchup.add_observer( @app_observer )
+    self.observe_selection( Sketchup.active_model )
+    #puts '---'
   end
   
   
@@ -237,11 +250,12 @@ module TT::Plugins::TransformationInspector
   
   
   # Observe Model
+  self.observe_models
   #puts 'Observing current model'
-  @app_observer ||= AppObserver.new
-  Sketchup.remove_observer( @app_observer ) if @app_observer
-  Sketchup.add_observer( @app_observer )
-  self.observe_selection( Sketchup.active_model )
+  #@app_observer ||= AppObserver.new
+  #Sketchup.remove_observer( @app_observer ) if @app_observer
+  #Sketchup.add_observer( @app_observer )
+  #self.observe_selection( Sketchup.active_model )
   #puts '---'
 
 
