@@ -25,6 +25,7 @@ end
 
 #-------------------------------------------------------------------------------
 
+if defined?( TT::Lib ) && TT::Lib.compatible?('2.6.0', 'Transformation Inspector')
 
 module TT::Plugins::TransformationInspector
   
@@ -297,7 +298,10 @@ module TT::Plugins::TransformationInspector
     $VERBOSE = original_verbose
   end
 
-end if defined?( TT::Lib ) && TT::Lib.compatible?('2.6.0', 'Transformation Inspector')
+end
+
+
+end # if TT_Lib
 
 #-------------------------------------------------------------------------------
 
