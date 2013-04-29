@@ -77,7 +77,7 @@ module TT::Plugins::TransformationInspector
   # @return [UI::WebDialog]
   # @since 1.0.0
   def self.create_window( options )
-    html_file = File.join( PATH, 'matrix.html' )
+    html_file = File.join( PATH_UI, 'matrix.html' )
     
     width  = options[ :width ]
     height = options[ :height ]
