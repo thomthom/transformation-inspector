@@ -13,7 +13,7 @@ rescue LoadError => e
     if @lib2_update.nil?
       url = 'http://www.thomthom.net/software/sketchup/tt_lib2/errors/not-installed'
       options = {
-        :dialog_title => 'TT_Lib² Not Installed',
+        :dialog_title => 'TT_LibÂ² Not Installed',
         :scrollable => false, :resizable => false, :left => 200, :top => 200
       }
       w = UI::WebDialog.new( options )
