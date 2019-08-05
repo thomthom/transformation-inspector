@@ -96,3 +96,43 @@ td.rotate.scale {
 td.translation {
   background: #dde;
 }
+
+.matrix .rotate.scale.x {
+  background: #eedddd;
+}
+.matrix .rotate.scale.y {
+  background: #ddeedd;
+}
+.matrix .rotate.scale.z {
+  background: #ddddee;
+}
+
+.matrix .translation.x {
+  background: #eecccc;
+}
+.matrix .translation.y {
+  background: #cceecc;
+}
+.matrix .translation.z {
+  background: #ccccee;
+}
+
+.matrix td {
+  position: relative;
+}
+
+.matrix td::after {
+  content: attr(data-matrix-index);
+  display: block;
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0.25em;
+  font-size: 1.5em;
+  opacity: 0.15;
+  color: #000;
+}
+
+.matrix:hover td::after {
+  visibility: visible;
+}

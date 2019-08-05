@@ -33,20 +33,20 @@ if defined?( TT::Lib ) && TT::Lib.compatible?( '2.7.0', 'Transformation Inspecto
 module TT::Plugins::TransformationInspector
 
   ### MENU & TOOLBARS ### ------------------------------------------------------
-  
+
   unless file_loaded?( __FILE__ )
     m = TT.menu( 'Plugins' )
     m.add_item( 'Transformation Inspector' ) { self.inspect_transformation }
-  end 
-  
-  
+  end
+
+
   ### MAIN SCRIPT ### ----------------------------------------------------------
-  
+
   # @since 1.0.0
   def self.inspect_transformation
     width  = 400
     height = 730
-    
+
     options = {
       :dialog_title => 'Transformation Matrix',
       :scrollable   => false,
@@ -57,9 +57,9 @@ module TT::Plugins::TransformationInspector
       :width        => width,
       :height       => height
     }
-    
+
     @window = self.create_window( options )
-    
+
     # Display the window on top of SketchUp's window.
     if @window.visible?
       @window.bring_to_front
@@ -71,47 +71,47 @@ module TT::Plugins::TransformationInspector
       end
     end
   end
-  
+
   # @param [Hash] options
   #
   # @return [UI::WebDialog]
   # @since 1.0.0
   def self.create_window( options )
     html_file = File.join( PATH_UI, 'matrix.html' )
-    
+
     width  = options[ :width ]
     height = options[ :height ]
-    
+
     window = UI::WebDialog.new( options )
     window.navigation_buttons_enabled = false
     window.set_size( width, height )
-    
+
     window.add_action_callback( 'update_transformation' ) { |dialog, params|
       #puts "update_transformation()"
       #puts "update_transformation( #{params.inspect} )"
       arg1, arg2 = params.split('||')
       matrix = Geom::Transformation.new( eval( arg1 ) )
       transformation = Geom::Transformation.new( eval( arg2 ) )
-      
+
       result = matrix * transformation
-      
+
       model = Sketchup.active_model
       sel = model.selection
       if sel.length == 1 && TT::Instance.is?( sel[0] )
         instance = sel[0]
         instance.transformation = result
       end
-      
+
       script = "UI.update_result_matrix(#{result.to_a.inspect});"
       @window.execute_script( script )
     }
-    
+
     window.add_action_callback( 'Window_Ready' ) { |dialog, params|
       #puts "Window_Ready()"
       self.selection_changed( Sketchup.active_model.selection )
       self.observe_models
     }
-    
+
     window.set_on_close {
       #puts 'Window Closing...'
       # Detach observers.
@@ -122,12 +122,12 @@ module TT::Plugins::TransformationInspector
         Sketchup.active_model.selection.remove_observer( @selection_observer )
       end
     }
-    
+
     window.set_file( html_file )
     window
   end
-  
-  
+
+
   # @param [Sketchup::Selection] selection
   #
   # @since 1.0.0
@@ -138,9 +138,11 @@ module TT::Plugins::TransformationInspector
         instance = selection[0]
         definition = TT::Instance.definition( instance )
         #puts "> Selected: #{instance.typename} (#{instance.name}) <#{definition.name}>"
+        tr = instance.model.edit_transform
+        local_transform = instance.transformation * tr.inverse
         k = instance.typename
         n = "#{instance.name} (#{definition.name})"
-        m = instance.transformation.to_a
+        m = local_transform.to_a
         script = "UI.update_entity(#{k.inspect},#{n.inspect},#{m.inspect});"
         @window.execute_script( script )
       else
@@ -149,8 +151,8 @@ module TT::Plugins::TransformationInspector
       end
     end
   end
-  
-  
+
+
   # @param [Sketchup::Model] model
   #
   # @since 1.0.0
@@ -162,8 +164,8 @@ module TT::Plugins::TransformationInspector
     model.selection.remove_observer( @selection_observer ) if @selection_observer
     model.selection.add_observer( @selection_observer )
   end
-  
-  
+
+
   # @since 1.0.0
   def self.observe_models
     #puts 'Observing current model'
@@ -173,26 +175,26 @@ module TT::Plugins::TransformationInspector
     self.observe_selection( Sketchup.active_model )
     #puts '---'
   end
-  
-  
+
+
   # @since 1.0.0
   class SelectionObserver < Sketchup::SelectionObserver
-    
+
     # @since 1.0.0
     def initialize( &block )
       @proc = block
     end
-    
+
     # @since 1.0.0
     def onSelectionBulkChange( selection )
       selectionChanged( selection )
     end
-    
+
     # @since 1.0.0
     def onSelectionCleared( selection )
       selectionChanged( selection )
     end
-    
+
     # @param [Sketchup::Selection] selection
     #
     # @since 1.0.0
@@ -200,31 +202,31 @@ module TT::Plugins::TransformationInspector
       #puts "\n[Event] Selection Changed (#{Time.now.to_i})"
       @proc.call( selection )
     end
-    
+
   end # class SelectionObserver
-  
-  
+
+
   # @since 1.0.0
   class AppObserver < Sketchup::AppObserver
-    
+
     # @since 1.0.0
     def onNewModel( model )
       #puts 'onNewModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
     end
-    
+
     # @since 1.0.0
     def onOpenModel( model )
       #puts 'onOpenModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
     end
-    
+
   end # class AppObserver
 
 
-  
-  ### DEBUG ### ------------------------------------------------------------  
-  
+
+  ### DEBUG ### ------------------------------------------------------------
+
   # @note Debug method to reload the plugin.
   #
   # @example
@@ -252,7 +254,7 @@ module TT::Plugins::TransformationInspector
   ensure
     $VERBOSE = original_verbose
   end
-  
+
 end # module
 
 end # if TT_Lib
