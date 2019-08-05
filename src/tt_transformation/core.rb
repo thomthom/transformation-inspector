@@ -135,13 +135,27 @@ module TT::Plugins::TransformationInspector
   # @return [Hash]
   def self.decompose_matrix(transformation)
     {
-      rotation: LGeom::LTransformation.euler_angles(transformation).map(&:radians),
-      scale: [
-        LGeom::LTransformation.xscale(transformation),
-        LGeom::LTransformation.yscale(transformation),
-        LGeom::LTransformation.zscale(transformation),
-      ]
+      rotation: self.euler_angles(transformation).map(&:radians),
+      scale: self.scaling(transformation),
     }
+  end
+
+  def self.euler_angles(transformation)
+    LGeom::LTransformation.euler_angles(transformation)
+  rescue StandardError => error
+    puts error
+    [0.0, 0.0, 0.0]
+  end
+
+  def self.scaling(transformation)
+    [
+      LGeom::LTransformation.xscale(transformation),
+      LGeom::LTransformation.yscale(transformation),
+      LGeom::LTransformation.zscale(transformation),
+    ]
+  rescue StandardError => error
+    puts error
+    [0.0, 0.0, 0.0]
   end
 
 
