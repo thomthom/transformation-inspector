@@ -170,7 +170,8 @@ var UI = function() {
   function modify_matrix( element, cache ) {
     var $table = $( element ).parents( 'table' );
     var $inputs = $table.find( 'input' );
-    var index = $inputs.index( element );
+    var row_major_index = $inputs.index( element );
+    var index = transpose_indices[row_major_index]; // column major index
 
     var value = parseFloat( $(element).val().replace(',', '.') );
 
