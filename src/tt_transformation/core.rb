@@ -25,6 +25,8 @@ rescue LoadError => e
   end
 end
 
+require 'tt_transformation/vendor/transformation'
+
 
 #-------------------------------------------------------------------------------
 
@@ -35,8 +37,9 @@ module TT::Plugins::TransformationInspector
   ### MENU & TOOLBARS ### ------------------------------------------------------
 
   unless file_loaded?( __FILE__ )
-    m = TT.menu( 'Plugins' )
-    m.add_item( 'Transformation Inspector' ) { self.inspect_transformation }
+    menu = TT.menu( 'Plugins' )
+    menu.add_item( 'Transformation Inspector' ) { self.inspect_transformation }
+    file_loaded( __FILE__ )
   end
 
 
@@ -45,7 +48,7 @@ module TT::Plugins::TransformationInspector
   # @since 1.0.0
   def self.inspect_transformation
     width  = 400
-    height = 730
+    height = 970
 
     options = {
       :dialog_title => 'Transformation Matrix',
@@ -102,7 +105,8 @@ module TT::Plugins::TransformationInspector
         instance.transformation = result
       end
 
-      script = "UI.update_result_matrix(#{result.to_a.inspect});"
+      d = self.decompose_matrix(result)
+      script = "UI.update_result_matrix(#{result.to_a.inspect}, #{d.to_json});"
       @window.execute_script( script )
     }
 
@@ -127,6 +131,19 @@ module TT::Plugins::TransformationInspector
     window
   end
 
+  # @param [Geom::Transformation]
+  # @return [Hash]
+  def self.decompose_matrix(transformation)
+    {
+      rotation: LGeom::LTransformation.euler_angles(transformation).map(&:radians),
+      scale: [
+        LGeom::LTransformation.xscale(transformation),
+        LGeom::LTransformation.yscale(transformation),
+        LGeom::LTransformation.zscale(transformation),
+      ]
+    }
+  end
+
 
   # @param [Sketchup::Selection] selection
   #
@@ -143,7 +160,8 @@ module TT::Plugins::TransformationInspector
         k = instance.typename
         n = "#{instance.name} (#{definition.name})"
         m = local_transform.to_a
-        script = "UI.update_entity(#{k.inspect},#{n.inspect},#{m.inspect});"
+        d = self.decompose_matrix(local_transform)
+        script = "UI.update_entity(#{k.inspect},#{n.inspect},#{m.inspect},#{d.to_json});"
         @window.execute_script( script )
       else
         #puts '> Invalid Selection'

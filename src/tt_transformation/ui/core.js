@@ -31,7 +31,9 @@ var UI = function() {
 
   var cache_entity;
   var cache_transf;
+  var cache_transf_info = null;
   var cache_result;
+  var cache_result_info = null;
 
   // HTML tables are accessed in a row-major manner.
   // SketchUp's transformation matrices are column-major.
@@ -42,6 +44,8 @@ var UI = function() {
     2, 6, 10, 14,
     3, 7, 11, 15,
   ]
+
+  var kFloatEpsilon = 1e-6
 
   return {
 
@@ -123,12 +127,13 @@ var UI = function() {
       });
     },
 
-    update_entity : function( klass, name, matrix ) {
+    update_entity : function( klass, name, matrix, info ) {
       $('#entity .klass').text( klass );
       $('#entity .name').text( name );
       cache_entity = matrix;
       cache_transf = Geom.identity_transformation();
       cache_result = matrix;
+      cache_transf_info = info;
       cache_changed();
     },
 
@@ -142,9 +147,11 @@ var UI = function() {
       cache_changed();
     },
 
-    update_result_matrix : function( matrix ) {
+    update_result_matrix : function( matrix, info ) {
       cache_result = matrix;
+      cache_result_info = info;
       update_matrix( '#resultTransformation', cache_result );
+      update_matrix_info( '#resultTransformation', cache_result_info );
     },
 
     reset : function() {
@@ -152,7 +159,9 @@ var UI = function() {
       $('#entity .name').text('Select only one Group or Component');
       cache_entity = Geom.null_transformation();
       cache_transf = Geom.identity_transformation();
+      cache_transf_info = null;
       cache_result = Geom.null_transformation();
+      cache_result_info = null;
       cache_changed();
     }
 
@@ -182,8 +191,25 @@ var UI = function() {
 
   function cache_changed() {
     update_matrix( '#matrixEntity', cache_entity );
+    update_matrix_info( '#matrixEntity', cache_transf_info );
     update_matrix( '#matrixTransformation', cache_transf );
     update_matrix( '#resultTransformation', cache_result );
+    update_matrix_info( '#resultTransformation', cache_result_info );
+  }
+
+  function float_eq(value1, value2) {
+    return (value1 - value2) < kFloatEpsilon;
+  }
+
+  function format_float(value) {
+    var formatted_value = parseFloat( value.toFixed(2) );
+    var locale_value = formatted_value.toLocaleString();
+    // Prepend with ~ to indicate number is truncated - ignoring floating point
+    // noise.
+    if (!float_eq(value, formatted_value)) {
+      locale_value = '~' + locale_value;
+    }
+    return locale_value;
   }
 
   function update_matrix( table, matrix ) {
@@ -192,14 +218,23 @@ var UI = function() {
       var index = transpose_indices[i];
       // Format value for output.
       var value = matrix[index];
-      var formatted_value = parseFloat( value.toFixed(2) );
-      var locale_value = formatted_value.toLocaleString();
-      if ( value != formatted_value ) {
-        locale_value = '~' + locale_value;
-      }
       // Update matrix.
-      $cells.eq(i).val( locale_value );
+      $cells.eq(i).val( format_float(value) );
     }
+  }
+
+  function update_matrix_info( table, matrix_info ) {
+    if (matrix_info === null) return;
+
+    var $info = $(table).find('tfoot.info');
+
+    $info.find('.x .rotation').text( format_float(matrix_info.rotation[0]) );
+    $info.find('.y .rotation').text( format_float(matrix_info.rotation[1]) );
+    $info.find('.z .rotation').text( format_float(matrix_info.rotation[2]) );
+
+    $info.find('.x .scale').text( format_float(matrix_info.scale[0]) );
+    $info.find('.y .scale').text( format_float(matrix_info.scale[1]) );
+    $info.find('.z .scale').text( format_float(matrix_info.scale[2]) );
   }
 
 }(); // UI

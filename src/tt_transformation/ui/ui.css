@@ -121,7 +121,7 @@ td.translation {
   position: relative;
 }
 
-.matrix td::after {
+.matrix tbody td::after {
   content: attr(data-matrix-index);
   display: block;
   visibility: hidden;
@@ -133,6 +133,25 @@ td.translation {
   color: #000;
 }
 
-.matrix:hover td::after {
+.matrix:hover tbody td::after {
   visibility: visible;
+}
+
+.matrix tfoot::before {
+  content: '';
+  display: table;
+  height: 1px;
+}
+
+.matrix tfoot th,
+.matrix tfoot td {
+  font-size: 0.8em;
+  text-align: center;
+  padding: 0.5em 0;
+  padding: 0.75em 0;
+}
+
+.matrix .info .rotation:after {
+  content: '°';
+  display: 'inline';
 }
