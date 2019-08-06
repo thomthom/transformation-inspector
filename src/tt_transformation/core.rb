@@ -1,51 +1,15 @@
-#-------------------------------------------------------------------------------
-#
-# Thomas Thomassen
-# thomas[at]thomthom[dot]net
-#
-#-------------------------------------------------------------------------------
-
-require 'sketchup.rb'
-begin
-  require 'TT_Lib2/core.rb'
-rescue LoadError => e
-  module TT
-    if @lib2_update.nil?
-      url = 'http://www.thomthom.net/software/sketchup/tt_lib2/errors/not-installed'
-      options = {
-        :dialog_title => 'TT_Lib² Not Installed',
-        :scrollable => false, :resizable => false, :left => 200, :top => 200
-      }
-      w = UI::WebDialog.new( options )
-      w.set_size( 500, 300 )
-      w.set_url( "#{url}?plugin=#{File.basename( __FILE__ )}" )
-      w.show
-      @lib2_update = w
-    end
-  end
-end
-
 require 'tt_transformation/vendor/transformation'
-
-
-#-------------------------------------------------------------------------------
-
-if defined?( TT::Lib ) && TT::Lib.compatible?( '2.7.0', 'Transformation Inspector' )
+require 'tt_transformation/instance'
 
 module TT::Plugins::TransformationInspector
 
-  ### MENU & TOOLBARS ### ------------------------------------------------------
-
   unless file_loaded?( __FILE__ )
-    menu = TT.menu( 'Plugins' )
+    menu = UI.menu( 'Plugins' )
     menu.add_item( 'Transformation Inspector' ) { self.inspect_transformation }
     file_loaded( __FILE__ )
   end
 
 
-  ### MAIN SCRIPT ### ----------------------------------------------------------
-
-  # @since 1.0.0
   def self.inspect_transformation
     width  = 400
     height = 970
@@ -67,7 +31,7 @@ module TT::Plugins::TransformationInspector
     if @window.visible?
       @window.bring_to_front
     else
-      if TT::System::PLATFORM_IS_OSX
+      if Sketchup.platform == :platform_osx
         @window.show_modal
       else
         @window.show
@@ -78,7 +42,6 @@ module TT::Plugins::TransformationInspector
   # @param [Hash] options
   #
   # @return [UI::WebDialog]
-  # @since 1.0.0
   def self.create_window( options )
     html_file = File.join( PATH_UI, 'matrix.html' )
 
@@ -100,7 +63,7 @@ module TT::Plugins::TransformationInspector
 
       model = Sketchup.active_model
       sel = model.selection
-      if sel.length == 1 && TT::Instance.is?( sel[0] )
+      if sel.length == 1 && Instance.is?( sel[0] )
         instance = sel[0]
         instance.transformation = result
       end
@@ -160,14 +123,12 @@ module TT::Plugins::TransformationInspector
 
 
   # @param [Sketchup::Selection] selection
-  #
-  # @since 1.0.0
   def self.selection_changed( selection )
     #puts "Selection Changed (#{selection.length})"
     if @window && @window.visible?
-      if selection.length == 1 && TT::Instance.is?( selection[0] )
+      if selection.length == 1 && Instance.is?( selection[0] )
         instance = selection[0]
-        definition = TT::Instance.definition( instance )
+        definition = Instance.definition( instance )
         #puts "> Selected: #{instance.typename} (#{instance.name}) <#{definition.name}>"
         tr = instance.model.edit_transform
         local_transform = instance.transformation * tr.inverse
@@ -186,8 +147,6 @@ module TT::Plugins::TransformationInspector
 
 
   # @param [Sketchup::Model] model
-  #
-  # @since 1.0.0
   def self.observe_selection( model )
     #puts '> Attaching Selection Observer'
     @selection_observer ||= SelectionObserver.new { |selection|
@@ -198,7 +157,6 @@ module TT::Plugins::TransformationInspector
   end
 
 
-  # @since 1.0.0
   def self.observe_models
     #puts 'Observing current model'
     @app_observer ||= AppObserver.new
@@ -209,27 +167,22 @@ module TT::Plugins::TransformationInspector
   end
 
 
-  # @since 1.0.0
   class SelectionObserver < Sketchup::SelectionObserver
 
-    # @since 1.0.0
     def initialize( &block )
       @proc = block
     end
 
-    # @since 1.0.0
     def onSelectionBulkChange( selection )
       selectionChanged( selection )
     end
 
-    # @since 1.0.0
     def onSelectionCleared( selection )
       selectionChanged( selection )
     end
 
     # @param [Sketchup::Selection] selection
     #
-    # @since 1.0.0
     def selectionChanged( selection )
       #puts "\n[Event] Selection Changed (#{Time.now.to_i})"
       @proc.call( selection )
@@ -238,16 +191,13 @@ module TT::Plugins::TransformationInspector
   end # class SelectionObserver
 
 
-  # @since 1.0.0
   class AppObserver < Sketchup::AppObserver
 
-    # @since 1.0.0
     def onNewModel( model )
       #puts 'onNewModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
     end
 
-    # @since 1.0.0
     def onOpenModel( model )
       #puts 'onOpenModel'
       TT::Plugins::TransformationInspector.observe_selection( model )
@@ -264,19 +214,13 @@ module TT::Plugins::TransformationInspector
   # @example
   #   TT::Plugins::TransformationInspector.reload
   #
-  # @param [Boolean] tt_lib Reloads TT_Lib2 if +true+.
-  #
   # @return [Integer] Number of files reloaded.
-  # @since 1.0.0
   def self.reload( tt_lib = false )
     original_verbose = $VERBOSE
     $VERBOSE = nil
-    TT::Lib.reload if tt_lib
-    # Core file (this)
     load __FILE__
-    # Supporting files
     if defined?( PATH ) && File.exist?( PATH )
-      x = Dir.glob( File.join(PATH, '*.{rb,rbs}') ).each { |file|
+      x = Dir.glob( File.join(PATH, '*.rb') ).each { |file|
         load file
       }
       x.length + 1
@@ -288,11 +232,3 @@ module TT::Plugins::TransformationInspector
   end
 
 end # module
-
-end # if TT_Lib
-
-#-------------------------------------------------------------------------------
-
-file_loaded( __FILE__ )
-
-#-------------------------------------------------------------------------------
