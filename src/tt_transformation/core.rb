@@ -1,4 +1,4 @@
-require 'tt_transformation/vendor/transformation'
+require 'tt_transformation/transformation_helper'
 require 'tt_transformation/instance'
 
 module TT::Plugins::TransformationInspector
@@ -60,6 +60,7 @@ module TT::Plugins::TransformationInspector
       transformation = Geom::Transformation.new( eval( arg2 ) )
 
       result = matrix * transformation
+      result.extend(TransformationHelper)
 
       model = Sketchup.active_model
       sel = model.selection
@@ -68,7 +69,7 @@ module TT::Plugins::TransformationInspector
         instance.transformation = result
       end
 
-      d = self.decompose_matrix(result)
+      d = result.decompose_matrix
       script = "UI.update_result_matrix(#{result.to_a.inspect}, #{d.to_json});"
       @window.execute_script( script )
     }
@@ -94,34 +95,6 @@ module TT::Plugins::TransformationInspector
     window
   end
 
-  # @param [Geom::Transformation]
-  # @return [Hash]
-  def self.decompose_matrix(transformation)
-    {
-      rotation: self.euler_angles(transformation).map(&:radians),
-      scale: self.scaling(transformation),
-    }
-  end
-
-  def self.euler_angles(transformation)
-    LGeom::LTransformation.euler_angles(transformation)
-  rescue StandardError => error
-    puts error
-    [0.0, 0.0, 0.0]
-  end
-
-  def self.scaling(transformation)
-    [
-      LGeom::LTransformation.xscale(transformation),
-      LGeom::LTransformation.yscale(transformation),
-      LGeom::LTransformation.zscale(transformation),
-    ]
-  rescue StandardError => error
-    puts error
-    [0.0, 0.0, 0.0]
-  end
-
-
   # @param [Sketchup::Selection] selection
   def self.selection_changed( selection )
     #puts "Selection Changed (#{selection.length})"
@@ -132,10 +105,11 @@ module TT::Plugins::TransformationInspector
         #puts "> Selected: #{instance.typename} (#{instance.name}) <#{definition.name}>"
         tr = instance.model.edit_transform
         local_transform = instance.transformation * tr.inverse
+        local_transform.extend(TransformationHelper)
         k = instance.typename
         n = "#{instance.name} (#{definition.name})"
         m = local_transform.to_a
-        d = self.decompose_matrix(local_transform)
+        d = local_transform.decompose_matrix
         script = "UI.update_entity(#{k.inspect},#{n.inspect},#{m.inspect},#{d.to_json});"
         @window.execute_script( script )
       else
@@ -215,7 +189,7 @@ module TT::Plugins::TransformationInspector
   #   TT::Plugins::TransformationInspector.reload
   #
   # @return [Integer] Number of files reloaded.
-  def self.reload( tt_lib = false )
+  def self.reload
     original_verbose = $VERBOSE
     $VERBOSE = nil
     load __FILE__
