@@ -5,47 +5,45 @@
 #
 #-------------------------------------------------------------------------------
 
+require 'json'
+
 require 'sketchup.rb'
 require 'extensions.rb'
 
-#-------------------------------------------------------------------------------
-
 module TT
- module Plugins
-  module TransformationInspector
+module Plugins
+module TransformationInspector
 
-  ### CONSTANTS ### ------------------------------------------------------------
+  file = __FILE__.dup
+  # Account for Ruby encoding bug under Windows.
+  file.force_encoding('UTF-8') if file.respond_to?(:force_encoding)
+  # Support folder should be named the same as the root .rb file.
+  folder_name = File.basename(file, '.*')
 
-  # Plugin information
-  PLUGIN_ID       = 'TT_Transformation'.freeze
-  PLUGIN_NAME     = 'Transformation Inspector'.freeze
-  PLUGIN_VERSION  = '1.2.2'.freeze
+  # Path to the root .rb file (this file).
+  PATH_ROOT = File.dirname(file).freeze
 
-  # Resource paths
-  FILENAMESPACE = File.basename( __FILE__, '.rb' )
-  PATH_ROOT     = File.dirname( __FILE__ ).freeze
-  PATH          = File.join( PATH_ROOT, FILENAMESPACE ).freeze
-  PATH_UI       = File.join( PATH, 'ui' ).freeze
+  # Path to the support folder.
+  PATH = File.join(PATH_ROOT, folder_name).freeze
 
+  # Extension information.
+  extension_json_file = File.join(PATH, 'extension.json')
+  extension_json = File.read(extension_json_file)
+  EXTENSION = ::JSON.parse(extension_json, symbolize_names: true).freeze
 
-  ### EXTENSION ### ------------------------------------------------------------
-
-  unless file_loaded?( __FILE__ )
-    loader = File.join( PATH, 'core.rb' )
-    ex = SketchupExtension.new( PLUGIN_NAME, loader )
-    ex.description = 'Inspect and modify the transformation matrix directly.'
-    ex.version     = PLUGIN_VERSION
-    ex.copyright   = 'Thomas Thomassen © 2012–2022'
-    ex.creator     = 'Thomas Thomassen (thomas@thomthom.net)'
-    Sketchup.register_extension( ex, true )
+  unless file_loaded?(__FILE__)
+    loader = File.join(PATH, 'bootstrap')
+    @extension = SketchupExtension.new(EXTENSION[:name], loader)
+    @extension.description = EXTENSION[:description]
+    @extension.version     = EXTENSION[:version]
+    @extension.copyright   = EXTENSION[:copyright]
+    @extension.creator     = EXTENSION[:creator]
+    Sketchup.register_extension(@extension, true)
   end
 
-  end # module TransformationInspector
- end # module Plugins
+end # module TransformationInspector
+end # module Plugins
 end # module TT
-
-#-------------------------------------------------------------------------------
 
 file_loaded( __FILE__ )
 
-#-------------------------------------------------------------------------------

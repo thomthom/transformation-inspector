@@ -1,0 +1,10 @@
+{
+  "name": "True Bend",
+  "description": "Inspect and modify the transformation matrix directly.",
+  "creator": "Thomas Thomassen",
+  "copyright": "Copyright © 2019-2021",
+  "license": "MIT License",
+  "product_id": "TT_Transformation",
+  "version": "1.2.0",
+  "build": "0"
+}

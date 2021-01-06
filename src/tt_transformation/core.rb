@@ -137,7 +137,7 @@ module TT::Plugins::TransformationInspector
         tr = instance.model.edit_transform
         local_transform = instance.transformation * tr.inverse
         local_transform.extend(TransformationHelper)
-        k = instance.typename
+        k = instance.typename # rubocop:disable SketchupPerformance/Typename
         n = "#{instance.name} (#{definition.name})"
         m = local_transform.to_a
         d = local_transform.decompose_matrix
@@ -227,14 +227,9 @@ module TT::Plugins::TransformationInspector
     @window = nil
     # rubocop:disable SketchupSuggestions/FileEncoding
     load __FILE__
-    if defined?( PATH ) && File.exist?( PATH )
-      x = Dir.glob( File.join(PATH, '*.rb') ).each { |file|
-        load file
-      }
-      x.length + 1
-    else
-      1
-    end
+    pattern = File.join(__dir__, '**/*.rb')
+    # rubocop:enable SketchupSuggestions/FileEncoding
+    Dir.glob(pattern).each { |file| load file }.size
   ensure
     $VERBOSE = original_verbose
   end
