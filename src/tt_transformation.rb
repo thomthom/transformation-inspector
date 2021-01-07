@@ -32,7 +32,7 @@ module TransformationInspector
   EXTENSION = ::JSON.parse(extension_json, symbolize_names: true).freeze
 
   unless file_loaded?(__FILE__)
-    loader = File.join(PATH, 'bootstrap')
+    loader = File.join(PATH, 'core')
     @extension = SketchupExtension.new(EXTENSION[:name], loader)
     @extension.description = EXTENSION[:description]
     @extension.version     = EXTENSION[:version]

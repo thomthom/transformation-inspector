@@ -40,7 +40,7 @@ module TT::Plugins::TransformationInspector
     options = {
       :dialog_title => 'Transformation Matrix',
       :scrollable   => false,
-      :pref_key     => PLUGIN_ID,
+      :pref_key     => EXTENSION[:product_id],
       :resizable    => false,
       :left         => 200,
       :top          => 200,
@@ -67,7 +67,7 @@ module TT::Plugins::TransformationInspector
   #
   # @return [UI::WebDialog]
   def self.create_window( options )
-    html_file = File.join( PATH_UI, 'matrix.html' )
+    html_file = File.join(PATH, 'ui', 'matrix.html')
 
     width  = options[ :width ]
     height = options[ :height ]
