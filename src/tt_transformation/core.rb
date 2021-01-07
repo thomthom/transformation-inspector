@@ -1,3 +1,9 @@
+require 'tt_transformation/nodes/node'
+require 'tt_transformation/nodes/points'
+require 'tt_transformation/nodes/transformation'
+
+require 'tt_transformation/nodes/example'
+
 require 'tt_transformation/transformation_helper'
 require 'tt_transformation/instance'
 
