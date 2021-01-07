@@ -7,18 +7,18 @@ module TT::Plugins::TransformationInspector
       raise TypeError unless points.is_a?(Array)
       raise TypeError unless points.all? { |n| n.is_a?(Geom::Point3d) }
       super()
-      # TODO: Takes no input.
-      self.data = points
-      on_output(:points) do |stream|
-        # puts "output: points (#{typename}:#{object_id})"
-        data
-      end
+      @properties = points
+    end
+
+    output :points, "Points" do |connection|
+      # puts "> output #{typename}:#{object_id}"
+      connection.node.properties
     end
 
     private
 
-    def data_as_hash
-      data.to_a
+    def properties_as_hash
+      properties.to_a
     end
 
   end # class Node

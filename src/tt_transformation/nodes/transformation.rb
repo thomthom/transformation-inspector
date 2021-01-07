@@ -4,40 +4,34 @@ module TT::Plugins::TransformationInspector
   class TransformationNode < Node
 
     def initialize(transformation)
+      # puts "initialize (#{typename}:#{object_id}) #{transformation.inspect}"
       raise TypeError unless transformation.is_a?(Geom::Transformation)
       super()
-      self.data = transformation
-      on_output(:points) do |stream|
-        # puts "output: points (#{typename}:#{object_id})"
-        # p [:points, input.class, input&.data]
-        # if input&.is_a?(PointsNode)
-        if stream.id = :points
-          # puts "> POINTS"
-          # puts "> POINTS >>> #{input.data}"
-          # input&.data&.map { |item| item.transform(data) }
-          # stream.data.map { |item| item.transform(data) }
-          stream.input(:points).map { |item| item.transform(data) }
-        else
-          # puts "> NIL (P)"
-          nil
-        end
-      end
-      on_output(:transformation) do |stream|
-        # puts "output: transformation (#{typename}:#{object_id})"
-        # p [:transformation, input.class, input&.data]
-        if stream.id = :transformation
-        # if input&.is_a?(TransformationNode)
-          # puts "> TRANSFORMATION"
-          # (input&.data || IDENTITY) * data
-          if stream.has_input?(:transformation)
-            stream.input(:transformation) * data
-          else
-            data
-          end
-        else
-          # puts "> NIL (T)"
-          nil
-        end
+      @properties = transformation
+    end
+
+    input :points, "Points" # TODO: Rename stream :geom ?
+
+    output :points, "Points" do |connection|
+      connection.input.data.map { |item|
+        # puts "> connection: #{connection.object_id}"
+        # puts "> node: #{connection.node.typename}:#{connection.node.object_id}"
+        # puts "> item: #{item.inspect}"
+        # puts "> properties: #{connection.node.properties.inspect}"
+        item.transform(connection.node.properties)
+      }
+
+      # connection.node.input(:points).data.map { |item| item.transform(properties) }
+    end
+
+
+    input :transformation, "Transformation"
+
+    output :transformation, "Transformation" do |connection|
+      if connection.has_input?
+        connection.input.data * connection.node.properties # TODO: Correct order?
+      else
+        connection.node.properties
       end
     end
 

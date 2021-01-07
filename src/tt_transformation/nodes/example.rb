@@ -44,29 +44,26 @@ module TT::Plugins::TransformationInspector
 
     tr1 = Geom::Transformation.scaling(1,2,3)
     tr_node1 = TransformationNode.new(tr1)
-    tr_node1.input = points_node.output(:points)
+    tr_node1.input(:points).connect_to(points_node.output(:points))
 
     # puts '2-------------------'
 
     tr2 = Geom::Transformation.new(ORIGIN, Y_AXIS)
     tr_node2 = TransformationNode.new(tr2)
-    tr_node2.input = tr_node1.output(:transformation)
+    tr_node2.input(:points).connect_to(tr_node1.output(:points))
 
     # puts '3-------------------'
 
-    # p [:points, points]
     print_points(:points, points)
     puts
-    # p [:points_node, points_node.output(:points).data]
     print_points(:points_node, points_node.output(:points).data)
+
     puts
-    # p [:tr_node1, tr_node1.output(:points).data]
     print_points(:tr_node1, tr_node1.output(:points).data)
-    print_transformation(:tr_node1, tr_node1.data)
+    print_transformation(:tr_node1, tr_node1.output(:transformation).data)
+
     puts
-    # p [:tr_node2, tr_node2.output(:points).data]
     print_points(:tr_node2, tr_node2.output(:points).data)
-    # p [:tr_node2, tr_node2.output(:transformation).data]
     print_transformation(:tr_node2, tr_node2.output(:transformation).data)
 
     # loop_draw_node = DrawLoopNode.new

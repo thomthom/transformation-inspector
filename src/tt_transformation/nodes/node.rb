@@ -5,141 +5,228 @@ module TT::Plugins::TransformationInspector
 
     class Error < StandardError; end
 
-    class MissingInputStream < Error; end
-    class InvalidStreamName < Error; end
-    class RecursiveStream < Error; end
+    class MissingInputChannel < Error; end
+    class InvalidChannelId < Error; end
+    class RecursiveAccess < Error; end
 
-    # parent = input
-    Stream = Struct.new(:id, :label, :parent, :processor, :nodes) do
+    # @input_channels = {} # @type [Hash{Symbol, InputChannel}]
+    # @output_channels = {} # @type [Hash{Symbol, OutputChannel}]
 
-      def has_input?(stream_id)
-        !parent.input.has_output?(stream_id)
-      end
+    # @return [Hash{Symbol, InputChannel}]
+    def self.input_channels
+      @input_channels ||= {}
+      @input_channels
+    end
 
-      def input(stream_id)
-        parent.input.output(stream_id).data
-      end
+    # @return [Hash{Symbol, OutputChannel}]
+    def self.output_channels
+      @output_channels ||= {}
+      @output_channels
+    end
 
-      def data
-        raise RecursiveStream if @updating
-        # puts "> Stream.data (#{object_id}) (Node: #{parent.typename}:#{parent.object_id})"
-        if @data.nil?
-          begin
-            @updating = true
-            @data = processor.call(self)
-          ensure
-            @updating = false
-          end
-        end
-        # @data ||= processor.call(self)
-        # puts "> Stream.data (#{object_id}) >>> #{@data}"
-        @data
-      end
 
-      def invalidate_cache
-        # puts "> Stream.invalidate_cache (#{object_id}) (Node: #{parent.typename}:#{parent.object_id})"
-        @data = nil
-      end
+    # @param [Symbol] channel_id
+    # @param [String] label
+    def self.input(channel_id, label)
+      channel = InputChannel.new(channel_id, label)
+      input_channels[channel_id] = channel
+    end
 
-      def to_h
-        {
-          id: @id,
-          label: @label,
-          # data: @data,
-          nodes: @nodes.map(&:object_id),
-        }
-      end
+    # @param [Symbol] channel_id
+    # @param [String] label
+    # @yield [connection]
+    # @yieldparam [OutputConnectionPoint] connection
+    def self.output(channel_id, label, &block)
+      # puts "Creating output channel '#{label}' (#{channel_id}) for #{typename}"
+      channel = OutputChannel.new(channel_id, label, block)
+      output_channels[channel_id] = channel
+    end
 
-    end # Stream
+    # @param [Symbol] channel_id
+    def self.output_processor(channel_id)
+      raise InvalidChannelId, "#{channel_id}" unless output_channels.key?(channel_id)
+      output_channels[channel_id].processor
+    end
 
 
     def self.typename
       name.split('::').last
     end
 
-    def initialize
-      # puts "INITIALIZE #{self.typename}:#{object_id}"
-      @state = {
-        label: 'Untitled',
-        position: Geom::Point2d.new,
-        input: nil, # @type [Node, nil]
-        output: {}, # @type [Hash<Symbol, Stream>]
-        data: nil, # @type [Object]
-      }
-      # @stream_processors = {}
-    end
-
-
     def typename
       self.class.typename
     end
 
 
-    def data
-      # puts "GET #{self.typename}:#{object_id} data"
-      # puts "GET #{self.typename}:#{object_id} >>> #{@state[:data].inspect}"
-      @state[:data]
-    end
+    InputChannel = Struct.new(:id, :label)
 
-    def data=(value)
-      # puts "SET #{self.typename}:#{object_id} data: #{value}"
-      @state[:data] = value
-    end
+    OutputChannel = Struct.new(:id, :label, :processor)
 
+    class ConnectionPoint
 
-    def input
-      @state[:input]
-    end
-
-    def input=(stream)
-      raise TypeError unless stream.is_a?(Stream)
-      if @state[:input]
-        @state[:input].delete(self)
+      def self.typename
+        name.split('::').last
       end
-      @state[:input] = stream.parent # TODO: Rename source_node or input
-      stream.nodes << self
-      invalidate_cache
-      trigger_event(:update, self)
+
+      def typename
+        self.class.typename
+      end
+
+      attr_accessor :channel_id, :node
+
+      def initialize(channel_id, node)
+        @channel_id = channel_id
+        @node = node
+      end
+
+    end
+
+    class InputConnectionPoint < ConnectionPoint
+
+      # @type [OutputConnectionPoint]
+      attr_reader :partner
+
+      # @param [OutputConnectionPoint] output
+      def connect_to(output)
+        raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
+        # puts "connect #{typename}:#{object_id} (#{node.typename}:#{node.object_id}) " <<
+        #      "to #{output.typename}:#{output.object_id} (#{output.node.typename}:#{output.node.object_id})"
+        if partner
+          partner.partners.delete(self)
+        end
+        @partner = output
+        output.partners << self
+        node.send(:invalidate_cache) # KLUDGE!
+        # node.invalidate_cache
+        # node.trigger_event(:update, self)
+      end
+
+      def data
+        # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
+        # puts "> node: #{node.typename}:#{node.object_id} (#{node.class})"
+        # puts "> partner: #{partner&.typename}:#{partner&.object_id}"
+        partner.data
+      end
+
+    end
+
+    class OutputConnectionPoint < ConnectionPoint
+
+      # @type [Set<InputConnectionPoint>]
+      attr_reader :partners
+
+      def initialize(channel_id, node)
+        super(channel_id, node)
+        @partners = Set.new
+      end
+
+      # # @param [InputConnectionPoint] input
+      def connect_to(input)
+        raise TypeError unless input.is_a?(InputConnectionPoint)
+        input.connect_to(self)
+      end
+
+
+      def has_input?
+        node.has_input?(channel_id)
+      end
+
+      # @return [InputConnectionPoint]
+      def input
+        node.input(channel_id)
+      end
+
+
+      def data
+        # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
+        raise RecursiveAccess if @updating
+        if @data.nil?
+          begin
+            @updating = true
+            @data = node.class.output_processor(channel_id).call(self)
+          ensure
+            @updating = false
+          end
+        end
+        @data
+      end
+
+      # @private
+      def invalidate_cache
+        @data = nil
+      end
+
     end
 
 
-    def has_output?(stream_id)
-      @state[:output].key?(stream_id)
+    attr_reader :properties
+
+    def initialize
+      # puts "INITIALIZE #{self.typename}:#{object_id}"
+      @label = 'Untitled'
+
+      @position = Geom::Point2d.new
+
+      # @type [Object]
+      @properties = nil
+
+      # @type [Hash<Symbol, InputConnectionPoint>]
+      @input = {}
+
+      # @type [Hash<Symbol, OutputConnectionPoint>]
+      @output = {}
     end
 
-    def output(stream_id)
-      # puts "output get: #{stream_id} (#{self.typename})"
-      # p @state[:output][stream_id]
-      @state[:output][stream_id] || (raise ArgumentError, "unknown stream: #{stream_id}")
+
+    # def properties
+    #   @properties
+    # end
+
+    # def properties=(value)
+    #   # puts "SET #{self.typename}:#{object_id} data: #{value}"
+    #   @properties = value
+    # end
+
+
+    def has_input?(channel_id)
+      @input.key?(channel_id)
+    end
+
+    def input(channel_id)
+      # puts "input(#{channel_id}) #{typename}:#{object_id}"
+      raise InvalidChannelId, "#{channel_id}" unless self.class.input_channels.key?(channel_id)
+      @input[channel_id] ||= InputConnectionPoint.new(channel_id, self)
+      @input[channel_id]
     end
 
 
-    def to_h
-      {
-        label: @state[:label],
-        position: @state[:position].to_a,
-        input: @state[:input].object_id,
-        output: @state[:output].map(&:to_h),
-        data: data_as_json,
-      }
+    def has_output?(channel_id)
+      @output.key?(channel_id)
     end
 
-    def to_json
-      to_h.to_json
+    def output(channel_id)
+      # puts "output(#{channel_id}) #{typename}:#{object_id}"
+      raise InvalidChannelId, "#{channel_id}" unless self.class.output_channels.key?(channel_id)
+      @output[channel_id] ||= OutputConnectionPoint.new(channel_id, self)
+      @output[channel_id]
     end
+
+
+    # def to_h
+    #   {
+    #     label: @label,
+    #     position: @position.to_a,
+    #     input: @input.object_id,
+    #     output: @output.map(&:to_h),
+    #     data: data_as_json,
+    #   }
+    # end
+
+    # def to_json
+    #   to_h.to_json
+    # end
 
     private
-
-    def on_output(stream_id, &block)
-      # puts "on_output: #{stream_id} (#{self.typename}:#{object_id})"
-      # @stream_processors[stream_id] = block
-      stream_label = stream_id # TODO:
-      # stream_data = block.call # TODO: Lazy generate.
-      stream_nodes = Set.new
-      # @state[:output][stream_id] = Stream.new(stream_id, stream_label, stream_data, block, stream_nodes)
-      # p [:block, block]
-      @state[:output][stream_id] = Stream.new(stream_id, stream_label, self, block, stream_nodes)
-    end
 
     def trigger_event(event_id, node)
       # puts "event: #{event_id} (#{typename}:#{object_id})"
@@ -147,10 +234,9 @@ module TT::Plugins::TransformationInspector
 
     def invalidate_cache
       # puts "invalidate_cache (#{typename}:#{object_id})"
-      @state[:output].each { |stream_id, stream|
+      @output.each { |channel_id, output_point|
         # puts "> #{stream_id}, (#{stream.id})"
-        # stream.data = stream.processor.call # TODO: Lazy generate.
-        stream.invalidate_cache
+        output_point.invalidate_cache
       }
     end
 
