@@ -38,18 +38,18 @@ module TT::Plugins::TransformationInspector
       Geom::Point3d.new(9, 9, 0),
       Geom::Point3d.new(0, 9, 0),
     ]
-    points_node = PointsNode.new(points)
+    points_node = PointsNode.new(points: points)
 
     # puts '1-------------------'
 
     tr1 = Geom::Transformation.scaling(1,2,3)
-    tr_node1 = TransformationNode.new(tr1)
+    tr_node1 = TransformationNode.new(transformation: tr1)
     tr_node1.input(:points).connect_to(points_node.output(:points))
 
     # puts '2-------------------'
 
     tr2 = Geom::Transformation.new(ORIGIN, Y_AXIS)
-    tr_node2 = TransformationNode.new(tr2)
+    tr_node2 = TransformationNode.new(transformation: tr2)
     tr_node2.input(:points).connect_to(tr_node1.output(:points))
 
     # puts '3-------------------'

@@ -127,16 +127,6 @@ module TT::Plugins::TransformationInspector
       end
 
 
-      def has_input?
-        node.has_input?(channel_id)
-      end
-
-      # @return [InputConnectionPoint]
-      def input
-        node.input(channel_id)
-      end
-
-
       def data
         # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
         raise RecursiveAccess if @updating
@@ -160,7 +150,7 @@ module TT::Plugins::TransformationInspector
     end
 
 
-    attr_reader :properties
+    attr_reader :config
 
     def initialize
       # puts "INITIALIZE #{self.typename}:#{object_id}"
@@ -168,8 +158,8 @@ module TT::Plugins::TransformationInspector
 
       @position = Geom::Point2d.new
 
-      # @type [Object]
-      @properties = nil
+      # User input for the node's configuration.
+      @config = {}
 
       # @type [Hash<Symbol, InputConnectionPoint>]
       @input = {}
@@ -177,16 +167,6 @@ module TT::Plugins::TransformationInspector
       # @type [Hash<Symbol, OutputConnectionPoint>]
       @output = {}
     end
-
-
-    # def properties
-    #   @properties
-    # end
-
-    # def properties=(value)
-    #   # puts "SET #{self.typename}:#{object_id} data: #{value}"
-    #   @properties = value
-    # end
 
 
     def has_input?(channel_id)

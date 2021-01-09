@@ -3,22 +3,15 @@ require 'tt_transformation/nodes/node'
 module TT::Plugins::TransformationInspector
   class PointsNode < Node
 
-    def initialize(points)
+    def initialize(points: [])
       raise TypeError unless points.is_a?(Array)
       raise TypeError unless points.all? { |n| n.is_a?(Geom::Point3d) }
       super()
-      @properties = points
+      config[:points] = points
     end
 
     output :points, "Points" do |connection|
-      # puts "> output #{typename}:#{object_id}"
-      properties # TODO: properties[:transformation]
-    end
-
-    private
-
-    def properties_as_hash
-      properties.to_a
+      config[:points]
     end
 
   end # class Node
