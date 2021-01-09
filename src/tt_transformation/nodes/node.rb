@@ -79,6 +79,19 @@ module TT::Plugins::TransformationInspector
         @node = node
       end
 
+      def to_h
+        {
+          id: object_id,
+          type: typename.to_sym,
+          channel_id: channel_id,
+          node: node&.object_id,
+        }
+      end
+
+      def to_s
+        "#{typename}:#{object_id}"
+      end
+
     end
 
     class InputConnectionPoint < ConnectionPoint
@@ -107,6 +120,12 @@ module TT::Plugins::TransformationInspector
         # puts "> node: #{node.typename}:#{node.object_id} (#{node.class})"
         # puts "> partner: #{partner&.typename}:#{partner&.object_id}"
         partner.data
+      end
+
+      def to_h
+        super.merge({
+          partner: partner.object_id
+        })
       end
 
     end
@@ -142,6 +161,12 @@ module TT::Plugins::TransformationInspector
           end
         end
         @data
+      end
+
+      def to_h
+        super.merge({
+          partners: partners.map(&:object_id)
+        })
       end
 
       # @private
@@ -203,19 +228,27 @@ module TT::Plugins::TransformationInspector
     end
 
 
-    # def to_h
-    #   {
-    #     label: @label,
-    #     position: @position.to_a,
-    #     input: @input.object_id,
-    #     output: @output.map(&:to_h),
-    #     data: data_as_json,
-    #   }
-    # end
+    def to_h
+      # TODO: Implement a serialize_hash/deserialize_hash scheme.
+      # TODO: Implement a type handler system for serialization.
+      {
+        id: object_id,
+        type: typename.to_sym,
+        label: @label,
+        position: @position.to_a,
+        input: @input.values.map!(&:to_h),
+        output: @output.values.map!(&:to_h),
+        config: config_to_hash,
+      }
+    end
 
-    # def to_json
-    #   to_h.to_json
-    # end
+    def to_json
+      to_h.to_json
+    end
+
+    def to_s
+      "#{typename}:#{object_id}"
+    end
 
     private
 

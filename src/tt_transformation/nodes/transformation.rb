@@ -41,5 +41,13 @@ module TT::Plugins::TransformationInspector
       end
     end
 
+    private
+
+    def config_to_hash
+      {
+        transformation: config[:transformation].to_a
+      }
+    end
+
   end # class Node
 end

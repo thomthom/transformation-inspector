@@ -16,5 +16,13 @@ module TT::Plugins::TransformationInspector
       config[:points]
     end
 
+    private
+
+    def config_to_hash
+      {
+        points: config[:points].map { |pt| pt.to_a.map(&:to_f) }
+      }
+    end
+
   end # class Node
 end
