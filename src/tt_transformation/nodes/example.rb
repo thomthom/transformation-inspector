@@ -73,7 +73,9 @@ module TT::Plugins::TransformationInspector
     # quad_draw_node.input = tr_node1.output(:points)
 
     # puts
+    # puts JSON.pretty_generate(points_node.to_h)
     # puts JSON.pretty_generate(tr_node1.to_h)
+    # puts JSON.pretty_generate(tr_node2.to_h)
     nil
   end
 
