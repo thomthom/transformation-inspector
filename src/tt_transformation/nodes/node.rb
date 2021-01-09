@@ -9,9 +9,6 @@ module TT::Plugins::TransformationInspector
     class InvalidChannelId < Error; end
     class RecursiveAccess < Error; end
 
-    # @input_channels = {} # @type [Hash{Symbol, InputChannel}]
-    # @output_channels = {} # @type [Hash{Symbol, OutputChannel}]
-
     # @return [Hash{Symbol, InputChannel}]
     def self.input_channels
       @input_channels ||= {}
@@ -34,25 +31,25 @@ module TT::Plugins::TransformationInspector
 
     # @param [Symbol] channel_id
     # @param [String] label
-    # @yield [connection]
-    # @yieldparam [OutputConnectionPoint] connection
     def self.output(channel_id, label, &block)
-      # puts "Creating output channel '#{label}' (#{channel_id}) for #{typename}"
       channel = OutputChannel.new(channel_id, label, block)
       output_channels[channel_id] = channel
     end
 
     # @param [Symbol] channel_id
+    # @raise [InvalidChannelId] if the channel id is not valid
     def self.output_processor(channel_id)
       raise InvalidChannelId, "#{channel_id}" unless output_channels.key?(channel_id)
       output_channels[channel_id].processor
     end
 
 
+      # @return [String]
     def self.typename
       name.split('::').last
     end
 
+      # @return [String]
     def typename
       self.class.typename
     end
@@ -64,16 +61,20 @@ module TT::Plugins::TransformationInspector
 
     class ConnectionPoint
 
+      # @return [String]
       def self.typename
         name.split('::').last
       end
 
+      # @return [String]
       def typename
         self.class.typename
       end
 
       attr_accessor :channel_id, :node
 
+      # @param [Symbol] channel_id
+      # @param [Node] node
       def initialize(channel_id, node)
         @channel_id = channel_id
         @node = node
@@ -99,6 +100,7 @@ module TT::Plugins::TransformationInspector
         node.send(:invalidate_cache) # KLUDGE!
         # node.invalidate_cache
         # node.trigger_event(:update, self)
+        nil
       end
 
       def data
@@ -115,17 +117,18 @@ module TT::Plugins::TransformationInspector
       # @type [Set<InputConnectionPoint>]
       attr_reader :partners
 
+      # @param [Symbol] channel_id
+      # @param [Node] node
       def initialize(channel_id, node)
         super(channel_id, node)
         @partners = Set.new
       end
 
-      # # @param [InputConnectionPoint] input
+      # @param [InputConnectionPoint] input
       def connect_to(input)
         raise TypeError unless input.is_a?(InputConnectionPoint)
         input.connect_to(self)
       end
-
 
       def data
         # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
@@ -169,10 +172,14 @@ module TT::Plugins::TransformationInspector
     end
 
 
+    # @param [Symbol] channel_id
     def has_input?(channel_id)
       @input.key?(channel_id)
     end
 
+    # @param [Symbol] channel_id
+    # @return [InputConnectionPoint]
+    # @raise [InvalidChannelId] if the channel id is not valid
     def input(channel_id)
       # puts "input(#{channel_id}) #{typename}:#{object_id}"
       raise InvalidChannelId, "#{channel_id}" unless self.class.input_channels.key?(channel_id)
@@ -181,10 +188,14 @@ module TT::Plugins::TransformationInspector
     end
 
 
+    # @param [Symbol] channel_id
     def has_output?(channel_id)
       @output.key?(channel_id)
     end
 
+    # @param [Symbol] channel_id
+    # @return [InputConnectionPoint]
+    # @raise [InvalidChannelId] if the channel id is not valid
     def output(channel_id)
       # puts "output(#{channel_id}) #{typename}:#{object_id}"
       raise InvalidChannelId, "#{channel_id}" unless self.class.output_channels.key?(channel_id)
@@ -209,8 +220,11 @@ module TT::Plugins::TransformationInspector
 
     private
 
+    # @param [Symbol] event_id
+    # @param [Node] node
     def trigger_event(event_id, node)
       # puts "event: #{event_id} (#{typename}:#{object_id})"
+      nil
     end
 
     def invalidate_cache
@@ -219,6 +233,7 @@ module TT::Plugins::TransformationInspector
         # puts "> #{stream_id}, (#{stream.id})"
         output_point.invalidate_cache
       }
+      nil
     end
 
   end # class Node

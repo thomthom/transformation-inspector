@@ -1,0 +1,4 @@
+--type-tag type:Solargraph Helper
+--type-tag in:Input Channel
+--type-tag out:Output Channel
+src/**/*.rb

@@ -3,27 +3,39 @@ require 'tt_transformation/nodes/node'
 module TT::Plugins::TransformationInspector
   class TransformationNode < Node
 
+    # @param [Geom::Transformation] transformation
     def initialize(transformation: IDENTITY)
       raise TypeError unless transformation.is_a?(Geom::Transformation)
       super()
       config[:transformation] = transformation
     end
 
-    input :points, "Points" # TODO: Rename stream :geom ?
+    # @in [Enumerable<#transform>]
+    input :geom, "Geom"
 
-    output :points, "Points" do |connection|
+    # @out [Enumerable<#transform>]
+    output :geom, "Geom" do
       tr = output(:transformation).data
-      input(:points).data.map { |item|
+      input(:geom).data.map { |item|
         item.transform(tr)
       }
     end
 
 
+    # @in [Geom::Transformation]
     input :transformation, "Transformation"
 
-    output :transformation, "Transformation" do |connection|
+    # @out [Geom::Transformation]
+    output :transformation, "Transformation" do
       if has_input?(:transformation)
-        input(:transformation).data * config[:transformation] # TODO: Correct order?
+        # Not sure what the best order of combination is. Need to experiment.
+        #
+        # N(pt) -> N(t1) -> N(t2)
+        # =
+        # pt.transform(t1).transform(t2)
+        # =
+        # pt.transform(t2 * t1)
+        config[:transformation] * input(:transformation).data
       else
         config[:transformation]
       end

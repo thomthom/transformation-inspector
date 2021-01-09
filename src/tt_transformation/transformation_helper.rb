@@ -24,7 +24,7 @@ module TransformationHelper
     }
   end
 
-  # @result [Array<Float, Float, Float>] rotation angles in radians
+  # @return [Array<Float, Float, Float>] rotation angles in radians
   def euler_angles
     LGeom::LTransformation.euler_angles(self)
   rescue StandardError => error
@@ -32,7 +32,7 @@ module TransformationHelper
     [0.0, 0.0, 0.0]
   end
 
-  # @param [Float]
+  # @return [Float]
   def x_scale
     scale = LGeom::LTransformation.xscale(self)
     flipped_x? ? -scale : scale
@@ -41,7 +41,7 @@ module TransformationHelper
     0.0
   end
 
-  # @param [Float]
+  # @return [Float]
   def y_scale
     scale = LGeom::LTransformation.yscale(self)
     flipped_y? ? -scale : scale
@@ -50,7 +50,7 @@ module TransformationHelper
     0.0
   end
 
-  # @param [Float]
+  # @return [Float]
   def z_scale
     scale = LGeom::LTransformation.zscale(self)
     flipped_z? ? -scale : scale
@@ -59,7 +59,7 @@ module TransformationHelper
     0.0
   end
 
-  # @result [Array<Float, Float, Float>]
+  # @return [Array<Float, Float, Float>]
   def scaling
     [x_scale, y_scale, z_scale]
   end

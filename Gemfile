@@ -6,4 +6,5 @@ group :development do
   gem 'rubocop-sketchup', '~> 0.18.0'
   gem 'sketchup-api-stubs' # Auto-complete for the SketchUp Rub API.
   gem 'skippy', '~> 0.4.1.a' # Aid with common SketchUp extension tasks.
+  gem 'yard', '~> 0.9.26'
 end
