@@ -18,20 +18,19 @@ module TT::Plugins::TransformationInspector
         # puts "> node: #{connection.node.typename}:#{connection.node.object_id}"
         # puts "> item: #{item.inspect}"
         # puts "> properties: #{connection.node.properties.inspect}"
-        item.transform(connection.node.properties)
+        # TODO: use :transformation output
+        item.transform(output)
       }
-
-      # connection.node.input(:points).data.map { |item| item.transform(properties) }
     end
 
 
     input :transformation, "Transformation"
 
     output :transformation, "Transformation" do |connection|
-      if connection.has_input?
-        connection.input.data * connection.node.properties # TODO: Correct order?
+      if has_input?(:transformation)
+        input(:transformation).data * properties # TODO: Correct order?
       else
-        connection.node.properties
+        properties
       end
     end
 

@@ -12,7 +12,7 @@ module TT::Plugins::TransformationInspector
 
     output :points, "Points" do |connection|
       # puts "> output #{typename}:#{object_id}"
-      connection.node.properties
+      properties # TODO: properties[:transformation]
     end
 
     private

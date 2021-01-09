@@ -143,7 +143,8 @@ module TT::Plugins::TransformationInspector
         if @data.nil?
           begin
             @updating = true
-            @data = node.class.output_processor(channel_id).call(self)
+            processor = node.class.output_processor(channel_id)
+            @data = node.instance_exec(self, &processor)
           ensure
             @updating = false
           end
