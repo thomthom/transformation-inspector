@@ -1,0 +1,50 @@
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties */
+:root {
+  /* --window-bg-color: brown; */
+}
+
+html {
+  background-color: #333;
+  color: #fff;
+
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 10pt;
+}
+
+.node {
+  position: absolute;
+  display: inline-block;
+  min-width: 100px;
+  max-width: 200px;
+
+  background-color: #555;
+  border: 1px solid #000;
+  border-radius: 4px;
+  overflow: hidden;
+
+  box-shadow: 2px 2px 6px #111;
+
+  padding: 5px;
+  margin: 5px
+}
+.node > header {
+  background-color: #444;
+  padding: 3px 10px;
+  margin: -5px -5px 5px -5px;
+}
+.node > header > .label {
+  color: #aaa;
+}
+
+.node section header {
+  font-weight: bold;
+}
+
+.node section {
+  margin: 10px 5px;
+}
+
+.node .partner {
+  display: inline;
+  color: #aaa;
+}

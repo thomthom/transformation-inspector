@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Transformation Inspector - Node Editor</title>
+  <link rel="stylesheet" href="nodes.css" />
+  </head>
+<body>
+
+<div id="editor">
+  <section class="node" v-for="node in nodes"
+    :style="{ left: node.position[0] + 'px', top: node.position[1] + 'px' }">
+
+    <header v-bind:title="node.type">
+      <div>{{ node.type }} (ID: {{ node.id }})</div>
+      <div class="label">{{ node.label }}</div>
+    </header>
+
+    <section class="config">
+      <header>Config:</header>
+      <div v-for="(value, key)  in node.config">
+        <span class="key">{{ key }}: </span>
+        <span class="value">{{ value }}</span>
+      </div>
+    </section>
+
+    <section class="input">
+      <header>Input:</header>
+      <div v-for="input in node.input">
+        {{ input.channel_id }} ({{ input.id }})
+        <div class="partner">
+          OutputID: {{ input.partner }}
+        </div>
+      </div>
+    </section>
+
+    <section class="output">
+      <header>Output:</header>
+      <div v-for="output in node.output">
+        {{ output.channel_id }} ({{ output.id }})
+        <div class="partner" v-for="partner in output.partners">
+          InputID: {{ partner }}
+        </div>
+      </div>
+    </section>
+
+  </section>
+</div>
+
+<script src="vue.global.js"></script>
+<script src="nodes.js"></script>
+
+</body>
+</html>
