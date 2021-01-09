@@ -102,8 +102,6 @@ module TT::Plugins::TransformationInspector
       # @param [OutputConnectionPoint] output
       def connect_to(output)
         raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
-        # puts "connect #{typename}:#{object_id} (#{node.typename}:#{node.object_id}) " <<
-        #      "to #{output.typename}:#{output.object_id} (#{output.node.typename}:#{output.node.object_id})"
         if partner
           partner.partners.delete(self)
         end
@@ -116,9 +114,6 @@ module TT::Plugins::TransformationInspector
       end
 
       def data
-        # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
-        # puts "> node: #{node.typename}:#{node.object_id} (#{node.class})"
-        # puts "> partner: #{partner&.typename}:#{partner&.object_id}"
         partner.data
       end
 
@@ -149,7 +144,6 @@ module TT::Plugins::TransformationInspector
       end
 
       def data
-        # puts "data (#{channel_id}) #{typename}:#{object_id} (#{node.typename}:#{node.object_id})"
         raise RecursiveAccess if @updating
         if @data.nil?
           begin
@@ -180,7 +174,6 @@ module TT::Plugins::TransformationInspector
     attr_reader :config
 
     def initialize
-      # puts "INITIALIZE #{self.typename}:#{object_id}"
       @label = 'Untitled'
 
       @position = Geom::Point2d.new
@@ -205,7 +198,6 @@ module TT::Plugins::TransformationInspector
     # @return [InputConnectionPoint]
     # @raise [InvalidChannelId] if the channel id is not valid
     def input(channel_id)
-      # puts "input(#{channel_id}) #{typename}:#{object_id}"
       raise InvalidChannelId, "#{channel_id}" unless self.class.input_channels.key?(channel_id)
       @input[channel_id] ||= InputConnectionPoint.new(channel_id, self)
       @input[channel_id]
@@ -221,7 +213,6 @@ module TT::Plugins::TransformationInspector
     # @return [InputConnectionPoint]
     # @raise [InvalidChannelId] if the channel id is not valid
     def output(channel_id)
-      # puts "output(#{channel_id}) #{typename}:#{object_id}"
       raise InvalidChannelId, "#{channel_id}" unless self.class.output_channels.key?(channel_id)
       @output[channel_id] ||= OutputConnectionPoint.new(channel_id, self)
       @output[channel_id]
@@ -255,14 +246,11 @@ module TT::Plugins::TransformationInspector
     # @param [Symbol] event_id
     # @param [Node] node
     def trigger_event(event_id, node)
-      # puts "event: #{event_id} (#{typename}:#{object_id})"
       nil
     end
 
     def invalidate_cache
-      # puts "invalidate_cache (#{typename}:#{object_id})"
       @output.each { |channel_id, output_point|
-        # puts "> #{stream_id}, (#{stream.id})"
         output_point.invalidate_cache
       }
       nil
