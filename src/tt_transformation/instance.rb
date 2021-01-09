@@ -1,10 +1,10 @@
+module TT::Plugins::TransformationInspector
 # Copied from TT_Lib
 # TODO: Switch to Skippy lib (tt-lib-3)
 #
 # Collection of Group, ComponentInstance and Image methods.
 #
 # @since 2.0.0
-module TT::Plugins::TransformationInspector
 module Instance
 
   # Returns the definition for a +Group+, +ComponentInstance+ or +Image+
