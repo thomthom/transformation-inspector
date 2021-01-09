@@ -3,10 +3,10 @@ const testNodes = [
     "id": 10500,
     "type": "PointsNode",
     "label": "Untitled",
-    "position": [
-      20.0,
-      30.0
-    ],
+    "position": {
+      x: 20.0,
+      y: 30.0
+    },
     "input": [
 
     ],
@@ -50,10 +50,10 @@ const testNodes = [
     "id": 10460,
     "type": "TransformationNode",
     "label": "Untitled",
-    "position": [
-      350.0,
-      100.0
-    ],
+    "position": {
+      x: 350.0,
+      y: 100.0
+    },
     "input": [
       {
         "id": 10540,
@@ -108,10 +108,10 @@ const testNodes = [
     "id": 10480,
     "type": "TransformationNode",
     "label": "Untitled",
-    "position": [
-      600.0,
-      100.0
-    ],
+    "position": {
+      x: 600.0,
+      y: 100.0
+    },
     "input": [
       {
         "id": 10600,
@@ -189,8 +189,9 @@ const NodeEditor = {
     },
     nodeDrag: function(event) {
       let node = this.drag.node;
-      node.position[0] = (node.position[0] + event.movementX);
-      node.position[1] = (node.position[1] + event.movementY);
+      // TODO: Prevent node from being moved to negative X and Y.
+      node.position.x = (node.position.x + event.movementX);
+      node.position.y = (node.position.y + event.movementY);
     },
     nodeEndDrag () {
       document.onmouseup = null;

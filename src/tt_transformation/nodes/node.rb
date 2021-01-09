@@ -270,7 +270,7 @@ module TT::Plugins::TransformationInspector
         id: object_id,
         type: typename.to_sym,
         label: @label,
-        position: @position.to_a,
+        position: { x: @position.x, y: position.y },
         input: @input.values.map!(&:to_h),
         output: @output.values.map!(&:to_h),
         config: config_to_hash,

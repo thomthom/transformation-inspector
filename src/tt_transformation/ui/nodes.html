@@ -10,11 +10,10 @@
 <div id="editor">
   <section class="node"
     :data-node-id="node.id"
-    :style="{ left: node.position[0] + 'px', top: node.position[1] + 'px' }"
-    @mousedown="nodeDragMouseDown"
+    :style="{ left: node.position.x + 'px', top: node.position.y + 'px' }"
     v-for="node in nodes">
 
-    <header v-bind:title="node.type">
+    <header @mousedown="nodeDragMouseDown">
       <div>{{ node.type }} (ID: {{ node.id }})</div>
       <div class="label">{{ node.label }}</div>
     </header>
@@ -23,11 +22,11 @@
       <header>Position:</header>
       <div>
         <span class="key">X: </span>
-        <span class="value">{{ node.position[0] }}</span>
+        <span class="value">{{ node.position.x }}</span>
       </div>
       <div>
         <span class="key">Y: </span>
-        <span class="value">{{ node.position[1] }}</span>
+        <span class="value">{{ node.position.y }}</span>
       </div>
     </section>
 
