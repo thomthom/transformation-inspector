@@ -8,13 +8,28 @@
 <body>
 
 <div id="editor">
-  <section class="node" v-for="node in nodes"
-    :style="{ left: node.position[0] + 'px', top: node.position[1] + 'px' }">
+  <section class="node"
+    :data-node-id="node.id"
+    :style="{ left: node.position[0] + 'px', top: node.position[1] + 'px' }"
+    @mousedown="nodeDragMouseDown"
+    v-for="node in nodes">
 
     <header v-bind:title="node.type">
       <div>{{ node.type }} (ID: {{ node.id }})</div>
       <div class="label">{{ node.label }}</div>
     </header>
+
+    <section class="position">
+      <header>Position:</header>
+      <div>
+        <span class="key">X: </span>
+        <span class="value">{{ node.position[0] }}</span>
+      </div>
+      <div>
+        <span class="key">Y: </span>
+        <span class="value">{{ node.position[1] }}</span>
+      </div>
+    </section>
 
     <section class="config">
       <header>Config:</header>

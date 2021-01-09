@@ -169,8 +169,34 @@ const NodeEditor = {
   data() {
     return {
       nodes: testNodes,
+      drag: {
+        node: undefined,
+      }
     }
-  }
+  },
+  methods: {
+    getNodeById: function(id) {
+      return this.nodes.find(node => node.id == id)
+    },
+    nodeDragMouseDown: function(event) {
+      event.preventDefault();
+      document.onmousemove = this.nodeDrag;
+      document.onmouseup = this.nodeEndDrag;
+
+      const node_element = event.target.closest('section.node');
+      const nodeId = node_element.dataset.nodeId;
+      this.drag.node = this.getNodeById(nodeId);
+    },
+    nodeDrag: function(event) {
+      let node = this.drag.node;
+      node.position[0] = (node.position[0] + event.movementX);
+      node.position[1] = (node.position[1] + event.movementY);
+    },
+    nodeEndDrag () {
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
+  },
 }
 
 Vue.createApp(NodeEditor).mount('#editor')
