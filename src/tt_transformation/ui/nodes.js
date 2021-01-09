@@ -1,3 +1,4 @@
+// Test data:
 const testNodes = [
   {
     "id": 10500,
@@ -165,6 +166,7 @@ const testNodes = [
 ];
 
 
+// The Application
 const NodeEditor = {
   data() {
     return {
@@ -176,7 +178,7 @@ const NodeEditor = {
   },
   methods: {
     getNodeById: function(id) {
-      return this.nodes.find(node => node.id == id)
+      return this.nodes.find(node => node.id == id);
     },
     nodeDragMouseDown: function(event) {
       event.preventDefault();
@@ -200,4 +202,4 @@ const NodeEditor = {
   },
 }
 
-Vue.createApp(NodeEditor).mount('#editor')
+Vue.createApp(NodeEditor).mount('#editor');
