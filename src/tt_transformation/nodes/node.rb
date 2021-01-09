@@ -5,7 +5,6 @@ module TT::Plugins::TransformationInspector
 
     class Error < StandardError; end
 
-    class MissingInputChannel < Error; end
     class InvalidChannelId < Error; end
     class RecursiveAccess < Error; end
 
