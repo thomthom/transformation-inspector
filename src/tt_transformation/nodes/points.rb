@@ -8,19 +8,19 @@ module TT::Plugins::TransformationInspector
       raise TypeError unless points.is_a?(Array)
       raise TypeError unless points.all? { |n| n.is_a?(Geom::Point3d) }
       super()
-      config[:points] = points
+      @config[:points] = points
     end
 
     # @out [Enumerable<#transform>]
     output :geom, "Geom" do
-      config[:points]
+      config(:points)
     end
 
     private
 
     def config_to_hash
       {
-        points: config[:points].map { |pt| pt.to_a.map(&:to_f) }
+        points: config(:points).map { |pt| pt.to_a.map(&:to_f) }
       }
     end
 

@@ -5,8 +5,11 @@ module TT::Plugins::TransformationInspector
 
     class Error < StandardError; end
 
+    class InvalidConfigKey < Error; end
     class InvalidChannelId < Error; end
+    class MissingInput < Error; end
     class RecursiveAccess < Error; end
+    class RecursiveConnection < Error; end
 
     # @return [Hash{Symbol, InputChannel}]
     def self.input_channels
@@ -92,6 +95,10 @@ module TT::Plugins::TransformationInspector
         "#{typename}:#{object_id}"
       end
 
+      def inspect
+        "#<#{to_s} channel_id=#{channel_id.inspect}>"
+      end
+
     end
 
     class InputConnectionPoint < ConnectionPoint
@@ -101,19 +108,11 @@ module TT::Plugins::TransformationInspector
 
       # @param [OutputConnectionPoint] output
       def connect_to(output)
-        raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
-        if partner
-          partner.partners.delete(self)
-        end
-        @partner = output
-        output.partners << self
-        node.send(:invalidate_cache) # KLUDGE!
-        # node.invalidate_cache
-        # node.trigger_event(:update, self)
-        nil
+        node.connect(self, output)
       end
 
       def data
+        raise MissingInput, "missing input on: #{channel_id}" if partner.nil?
         partner.data
       end
 
@@ -121,6 +120,15 @@ module TT::Plugins::TransformationInspector
         super.merge({
           partner: partner.object_id
         })
+      end
+
+      def inspect
+        "#<#{to_s} channel_id=#{channel_id.inspect}, partner=#{partner&.object_id.inspect}>"
+      end
+
+      # @private
+      def partner=(output)
+        @partner = output
       end
 
     end
@@ -139,8 +147,7 @@ module TT::Plugins::TransformationInspector
 
       # @param [InputConnectionPoint] input
       def connect_to(input)
-        raise TypeError unless input.is_a?(InputConnectionPoint)
-        input.connect_to(self)
+        node.connect(input, self)
       end
 
       def data
@@ -165,13 +172,14 @@ module TT::Plugins::TransformationInspector
 
       # @private
       def invalidate_cache
+        # TODO: Use events to invalidate the output.
         @data = nil
       end
 
     end
 
 
-    attr_reader :config
+    attr_reader :label, :position
 
     def initialize
       @label = 'Untitled'
@@ -186,6 +194,24 @@ module TT::Plugins::TransformationInspector
 
       # @type [Hash<Symbol, OutputConnectionPoint>]
       @output = {}
+    end
+
+
+    # @param [Symbol] key
+    def config(key)
+      raise InvalidConfigKey, "invalid config key: #{key}" unless @config.key?(key)
+      @config[key]
+    end
+
+    # @param [Symbol] key
+    # @param [Object] value
+    # @return [nil]
+    def set_config(key, value)
+      raise InvalidConfigKey, "invalid config key: #{key}" unless @config.key?(key)
+      @config[key] = value
+      invalidate_cache
+      # trigger_event(:update, self)
+      nil
     end
 
 
@@ -219,6 +245,24 @@ module TT::Plugins::TransformationInspector
     end
 
 
+    # @param [InputConnectionPoint] input
+    # @param [OutputConnectionPoint] output
+    def connect(input, output)
+      # TODO: node.connect(input, output)
+      raise TypeError, "got #{input.class}" unless input.is_a?(InputConnectionPoint)
+      raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
+      raise RecursiveConnection, "cannot connect to itself" if input.node == output.node
+      if input.partner
+        input.partner.partners.delete(self)
+      end
+      input.partner = output
+      output.partners << self
+      invalidate_cache
+      # trigger_event(:update, self)
+      nil
+    end
+
+
     def to_h
       # TODO: Implement a serialize_hash/deserialize_hash scheme.
       # TODO: Implement a type handler system for serialization.
@@ -241,6 +285,10 @@ module TT::Plugins::TransformationInspector
       "#{typename}:#{object_id}"
     end
 
+    def inspect
+      "#<#{to_s} label=#{label.inspect}>"
+    end
+
     private
 
     # @param [Symbol] event_id
@@ -253,6 +301,7 @@ module TT::Plugins::TransformationInspector
       @output.each { |channel_id, output_point|
         output_point.invalidate_cache
       }
+      # trigger_event(:update, self)
       nil
     end
 

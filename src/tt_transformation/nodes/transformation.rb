@@ -7,7 +7,7 @@ module TT::Plugins::TransformationInspector
     def initialize(transformation: IDENTITY)
       raise TypeError unless transformation.is_a?(Geom::Transformation)
       super()
-      config[:transformation] = transformation
+      @config[:transformation] = transformation
     end
 
     # @in [Enumerable<#transform>]
@@ -35,9 +35,9 @@ module TT::Plugins::TransformationInspector
         # pt.transform(t1).transform(t2)
         # =
         # pt.transform(t2 * t1)
-        config[:transformation] * input(:transformation).data
+        config(:transformation) * input(:transformation).data
       else
-        config[:transformation]
+        config(:transformation)
       end
     end
 
@@ -45,7 +45,7 @@ module TT::Plugins::TransformationInspector
 
     def config_to_hash
       {
-        transformation: config[:transformation].to_a
+        transformation: config(:transformation).to_a
       }
     end
 
