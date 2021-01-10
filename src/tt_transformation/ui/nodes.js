@@ -237,15 +237,17 @@ const NodeEditor = {
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/isPointInPath#checking_a_point_in_the_specified_path
       let connections = new Map();
       for (const element of elements) {
+        const nodeElement = element.closest('.node');
+        const nodeBounds = nodeElement.getBoundingClientRect();
+
         const connectorId = parseInt(element.dataset.connectorId);
-        // const connector = this.getConnectorById(connectorId);
         const bounds = element.getBoundingClientRect();
         let position = new Point2d(0, 0);
         if (type == ConnectorType.Output) {
-          position.x = bounds.right;
+          position.x = nodeBounds.right - 1;
           position.y = bounds.top + Math.round(bounds.height / 2);
         } else {
-          position.x = bounds.left;
+          position.x = nodeBounds.left + 1;
           position.y = bounds.top + Math.round(bounds.height / 2);
         }
         connections.set(connectorId, position);
@@ -314,24 +316,24 @@ const NodeEditor = {
      * @param {ConnectorType} type
      * @param {number} radius
      */
-    drawConnectionPoints(ctx, points, type, radius = 5) {
+    drawConnectionPoints(ctx, points, type, radius = 6) {
       // Background
       const circle = Math.PI * 2;
-      ctx.fillStyle = '#777777'; // TODO: Get from .node CSS.
+      ctx.fillStyle = '#888'; // TODO: Get from .node CSS.
       // Border
       const startAngle = -Math.PI / 2;
       const endAngle = Math.PI / 2;
       const clockwise = type == ConnectorType.Input;
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = '#000000'; // TODO: Get from .node CSS.
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#000'; // TODO: Get from .node CSS.
       for (const pt of points) {
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, radius, 0, circle);
-        ctx.fill();
-
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, radius, startAngle, endAngle, clockwise);
         ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, 0, circle);
+        ctx.fill();
       }
     },
 
