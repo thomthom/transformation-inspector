@@ -1,4 +1,5 @@
 // @ts-check
+// https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html
 
 // Test data:
 const testNodes = [
@@ -185,6 +186,12 @@ class Size {
   }
 };
 
+/** @enum {number} */
+const ConnectorType = {
+  Input: 0,
+  Output: 1,
+};
+
 // The Application
 const NodeEditor = {
   data() {
@@ -212,6 +219,39 @@ const NodeEditor = {
       canvas.height = window.innerHeight;
       this.drawNodeConnections();
     },
+    /**
+     * @param {NodeListOf<HTMLElement>} elements
+     * @param {ConnectorType} type
+     * @return {Map<number, Point2d>}
+     */
+    computeConnectorPoints: function(elements, type) {
+      // TODO:
+      // If you need the bounding rectangle relative to the top-left corner of
+      // the document, just add the current scrolling position to the top and
+      // left properties (these can be obtained using window.scrollX and
+      // window.scrollY) to get a bounding rectangle which is independent from
+      // the current scrolling position.
+      //
+      // TODO: Use Path2d so we can check for points in a path/stroke.
+      // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
+      // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/isPointInPath#checking_a_point_in_the_specified_path
+      let connections = new Map();
+      for (const element of elements) {
+        const connectorId = parseInt(element.dataset.connectorId);
+        // const connector = this.getConnectorById(connectorId);
+        const bounds = element.getBoundingClientRect();
+        let position = new Point2d(0, 0);
+        if (type == ConnectorType.Output) {
+          position.x = bounds.right;
+          position.y = bounds.top + Math.round(bounds.height / 2);
+        } else {
+          position.x = bounds.left;
+          position.y = bounds.top + Math.round(bounds.height / 2);
+        }
+        connections.set(connectorId, position);
+      }
+      return connections;
+    },
     drawNodeConnections: function() {
       const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
@@ -221,65 +261,32 @@ const NodeEditor = {
       // ctx.fillStyle = '#0f02';
       // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = 'orange';
-      ctx.strokeStyle = 'orange';
-      ctx.lineWidth = 2;
-
       /** @type {NodeListOf<HTMLElement>} */
       const outputs = document.querySelectorAll('.node > .output > .connector');
+      const outputPoints = this.computeConnectorPoints(outputs, ConnectorType.Output);
+      this.drawConnectionPoints(ctx, outputPoints.values(), ConnectorType.Output);
+
+      /** @type {NodeListOf<HTMLElement>} */
+      const inputs = document.querySelectorAll('.node > .input > .connector');
+      const inputPoints = this.computeConnectorPoints(inputs, ConnectorType.Input);
+      this.drawConnectionPoints(ctx, inputPoints.values(), ConnectorType.Input);
+
       for (const output_element of outputs) {
         const outputId = parseInt(output_element.dataset.connectorId);
         const output = this.getConnectorById(outputId);
+        const outPoint = outputPoints.get(outputId);
         for (const partner of output.partners) {
-          // const input = this.getConnectorById(partner);
-          const query = `[data-connector-id='${partner}']`;
-          const input_element = document.querySelector(query);
-          this.drawNodeConnection(ctx, output_element, input_element);
+          const inPoint = inputPoints.get(partner);
+          this.drawConnection(ctx, outPoint, inPoint);
         }
       }
-    },
-    drawNodeConnection: function(ctx, output_element, input_element) {
-      // TODO:
-      // If you need the bounding rectangle relative to the top-left corner of
-      // the document, just add the current scrolling position to the top and
-      // left properties (these can be obtained using window.scrollX and
-      // window.scrollY) to get a bounding rectangle which is independent from
-      // the current scrolling position.
-      const out_bounds = output_element.getBoundingClientRect();
-      const out_x = out_bounds.right;
-      const out_y = out_bounds.top + Math.round(out_bounds.height / 2);
-      const out_pt = new Point2d(out_x, out_y);
-
-      const in_bounds = input_element.getBoundingClientRect();
-      const in_x = in_bounds.left;
-      const in_y = in_bounds.top + Math.round(in_bounds.height / 2);
-      const in_pt = new Point2d(in_x, in_y);
-
-      // TODO: Use Path2d so we can check for points in a path/stroke.
-      // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
-      // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/isPointInPath#checking_a_point_in_the_specified_path
-
-      // console.log(
-      //   'out x,y', out_x, out_y,
-      //   'in x,y', in_x, in_y,
-      // );
-
-      // ctx.lineWidth = 1;
-      // ctx.beginPath();
-      // ctx.rect(out_bounds.left + 0.5, out_bounds.top + 0.5, out_bounds.width, out_bounds.height);
-      // ctx.rect(in_bounds.left + 0.5, in_bounds.top + 0.5, in_bounds.width, in_bounds.height);
-      // ctx.stroke();
-      this.drawConnectionPoints(ctx, [out_pt], false);
-      this.drawConnectionPoints(ctx, [in_pt], true);
-
-      this.draw_connection(ctx, out_pt, in_pt);
     },
     /**
      * @param {CanvasRenderingContext2D} [ctx]
      * @param {Point2d} [pt1]
      * @param {Point2d} [pt2]
      */
-    draw_connection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
+    drawConnection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
       const dx = Math.round((pt1.x - pt2.x) / tension);
 
       ctx.fillStyle = 'orange';
@@ -303,29 +310,29 @@ const NodeEditor = {
     },
     /**
      * @param {CanvasRenderingContext2D} ctx
-     * @param {[Point2d]} points
-     * @param {boolean} is_input
+     * @param {IterableIterator<Point2d>} points
+     * @param {ConnectorType} type
      * @param {number} radius
      */
-    drawConnectionPoints(ctx, points, isInput, radius = 5) {
+    drawConnectionPoints(ctx, points, type, radius = 5) {
       // Background
       const circle = Math.PI * 2;
-      ctx.fillStyle = '#777'; // TODO: Get from .node CSS.
-      ctx.beginPath();
-      for (const pt of points) {
-        ctx.arc(pt.x, pt.y, radius, 0, circle);
-      }
-      ctx.fill();
+      ctx.fillStyle = '#777777'; // TODO: Get from .node CSS.
       // Border
       const startAngle = -Math.PI / 2;
       const endAngle = Math.PI / 2;
+      const clockwise = type == ConnectorType.Input;
       ctx.lineWidth = 1;
-      ctx.strokeStyle = '#000'; // TODO: Get from .node CSS.
-      ctx.beginPath();
+      ctx.strokeStyle = '#000000'; // TODO: Get from .node CSS.
       for (const pt of points) {
-        ctx.arc(pt.x, pt.y, radius, startAngle, endAngle, isInput);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, 0, circle);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, startAngle, endAngle, clockwise);
+        ctx.stroke();
       }
-      ctx.stroke();
     },
 
     getConnectorById: function(id) {
