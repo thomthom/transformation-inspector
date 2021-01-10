@@ -387,6 +387,16 @@ const NodeEditor = {
 
 const app = Vue.createApp(NodeEditor);
 
+// Filters were removed in Vue3.
+// Using this temporarily until node component is fleshed out and this can
+// be replaced with a computed property.
+// https://v3.vuejs.org/guide/migration/filters.html#migration-strategy
+app.config.globalProperties.$filters = {
+  nodeType(value) {
+    return value.slice(0, value.lastIndexOf('Node'));
+  }
+}
+
 // Kludge! Ideally the whole node would be a component. But since
 // we're not using single file components it's awkward to edit the template
 // inline in a JS template string.

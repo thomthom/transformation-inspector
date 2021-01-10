@@ -16,7 +16,7 @@
     v-for="node in nodes">
 
     <header @mousedown="nodeDragMouseDown">
-      <div>{{ node.type }} (ID: {{ node.id }})</div>
+      <div>{{ $filters.nodeType(node.type) }} (ID: {{ node.id }})</div>
       <div class="label">{{ node.label }}</div>
     </header>
 
