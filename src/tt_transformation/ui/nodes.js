@@ -258,7 +258,7 @@ const NodeEditor = {
     /**
      * @param {MouseEvent} event
      */
-    toolMove: function(event) {
+    toolMouseMove: function(event) {
       // console.log('mouse', event.x, event.y);
       this.tool.cursor = new Point2d(event.x, event.y);
 
@@ -490,7 +490,7 @@ const NodeEditor = {
     this.updateConnectors();
     // TODO: Listen to viewport size change.
     this.resizeCanvas();
-    document.addEventListener('mousemove', this.toolMove);
+    document.addEventListener('mousemove', this.toolMouseMove);
   },
 }
 
