@@ -8,6 +8,8 @@
 <body>
 
 <div id="editor">
+  <canvas id="canvas"></canvas>
+
   <section class="node"
     :data-node-id="node.id"
     :style="{ left: node.position.x + 'px', top: node.position.y + 'px' }"
@@ -40,7 +42,7 @@
 
     <section class="input">
       <header>Input:</header>
-      <div v-for="input in node.input">
+      <div class="connector" :data-connector-id="input.id"  v-for="input in node.input">
         {{ input.channel_id }} ({{ input.id }})
         <div class="partner">
           OutputID: {{ input.partner }}
@@ -50,7 +52,7 @@
 
     <section class="output">
       <header>Output:</header>
-      <div v-for="output in node.output">
+      <div class="connector" :data-connector-id="output.id"  v-for="output in node.output">
         {{ output.channel_id }} ({{ output.id }})
         <div class="partner" v-for="partner in output.partners">
           InputID: {{ partner }}
