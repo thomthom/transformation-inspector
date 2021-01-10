@@ -168,13 +168,17 @@ const testNodes = [
 ];
 
 class Point2d {
+  /** @param {number} [x] */
+  /** @param {number} [y] */
   constructor(x, y) {
     this.x = x;
     this.y = y;
   }
 };
 
-class Rectangle {
+class Size {
+  /** @param {number} [width] */
+  /** @param {number} [height] */
   constructor(width, height) {
     this.width = width;
     this.height = height;
@@ -202,13 +206,13 @@ const NodeEditor = {
     getNodeCanvas: function() {
       return this.getCanvasById('canvasNodes');
     },
-    resize_canvas: function() {
+    resizeCanvas: function() {
       const canvas = this.getNodeCanvas();
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      this.draw_node_connections();
+      this.drawNodeConnections();
     },
-    draw_node_connections: function() {
+    drawNodeConnections: function() {
       const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
 
@@ -230,11 +234,11 @@ const NodeEditor = {
           // const input = this.getConnectorById(partner);
           const query = `[data-connector-id='${partner}']`;
           const input_element = document.querySelector(query);
-          this.draw_node_connection(ctx, output_element, input_element);
+          this.drawNodeConnection(ctx, output_element, input_element);
         }
       }
     },
-    draw_node_connection: function(ctx, output_element, input_element) {
+    drawNodeConnection: function(ctx, output_element, input_element) {
       // TODO:
       // If you need the bounding rectangle relative to the top-left corner of
       // the document, just add the current scrolling position to the top and
@@ -265,6 +269,8 @@ const NodeEditor = {
       // ctx.rect(out_bounds.left + 0.5, out_bounds.top + 0.5, out_bounds.width, out_bounds.height);
       // ctx.rect(in_bounds.left + 0.5, in_bounds.top + 0.5, in_bounds.width, in_bounds.height);
       // ctx.stroke();
+      this.drawConnectionPoints(ctx, [out_pt], false);
+      this.drawConnectionPoints(ctx, [in_pt], true);
 
       this.draw_connection(ctx, out_pt, in_pt);
     },
@@ -276,6 +282,10 @@ const NodeEditor = {
     draw_connection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
       const dx = Math.round((pt1.x - pt2.x) / tension);
 
+      ctx.fillStyle = 'orange';
+      ctx.strokeStyle = 'orange';
+      ctx.lineWidth = 2;
+
       ctx.beginPath();
       ctx.moveTo(pt1.x, pt1.y);
       ctx.bezierCurveTo(
@@ -285,11 +295,37 @@ const NodeEditor = {
       );
       ctx.stroke();
 
-      const angle = Math.PI * 2;
+      const circle = Math.PI * 2;
       ctx.beginPath();
-      ctx.arc(pt1.x, pt1.y, radius, 0, angle);
-      ctx.arc(pt2.x, pt2.y, radius, 0, angle);
+      ctx.arc(pt1.x, pt1.y, radius, 0, circle);
+      ctx.arc(pt2.x, pt2.y, radius, 0, circle);
       ctx.fill();
+    },
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {[Point2d]} points
+     * @param {boolean} is_input
+     * @param {number} radius
+     */
+    drawConnectionPoints(ctx, points, isInput, radius = 5) {
+      // Background
+      const circle = Math.PI * 2;
+      ctx.fillStyle = '#777'; // TODO: Get from .node CSS.
+      ctx.beginPath();
+      for (const pt of points) {
+        ctx.arc(pt.x, pt.y, radius, 0, circle);
+      }
+      ctx.fill();
+      // Border
+      const startAngle = -Math.PI / 2;
+      const endAngle = Math.PI / 2;
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#000'; // TODO: Get from .node CSS.
+      ctx.beginPath();
+      for (const pt of points) {
+        ctx.arc(pt.x, pt.y, radius, startAngle, endAngle, isInput);
+      }
+      ctx.stroke();
     },
 
     getConnectorById: function(id) {
@@ -310,7 +346,7 @@ const NodeEditor = {
     onNodeMove: function(nodeId, x, y) {
       // console.log('onNodeMove', nodeId, x, y);
       // TODO: Debounce this call? In case multiple nodes are updated in bulk.
-      this.$nextTick(this.draw_node_connections);
+      this.$nextTick(this.drawNodeConnections);
     },
 
     nodeDragMouseDown: function(event) {
@@ -336,7 +372,7 @@ const NodeEditor = {
   },
   mounted() {
     // TODO: Listen to viewport size change.
-    this.resize_canvas();
+    this.resizeCanvas();
   },
 }
 
