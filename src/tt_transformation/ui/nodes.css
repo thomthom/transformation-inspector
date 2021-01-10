@@ -57,12 +57,23 @@ be of much use anyway.
   color: #aaa;
 }
 
+.node .debug {
+  color: #aaa;
+}
+
 .node section header {
   font-weight: bold;
 }
 
 .node section {
   margin: 10px 5px;
+}
+
+.node .output > header {
+  text-align: right;
+}
+.node .output .connector {
+  text-align: right;
 }
 
 .node .partner {

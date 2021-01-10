@@ -410,7 +410,11 @@ app.component('node-watcher', {
       { deep: true }
     );
   },
-  template: `<section class="position"><b>Position:</b> {{ node.position.x }}, {{ node.position.y }}</section>`
+  template: `
+  <section class="position">
+    <b>Position</b> {{ node.position.x }}, {{ node.position.y }}
+  </section>
+  `
 });
 
 const vm = app.mount('#editor');
