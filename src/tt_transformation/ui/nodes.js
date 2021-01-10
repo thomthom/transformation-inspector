@@ -294,9 +294,10 @@ const NodeEditor = {
     },
     nodeDrag: function(event) {
       let node = this.drag.node;
-      // TODO: Prevent node from being moved to negative X and Y.
-      node.position.x = (node.position.x + event.movementX);
-      node.position.y = (node.position.y + event.movementY);
+      let x = (node.position.x + event.movementX);
+      let y = (node.position.y + event.movementY);
+      node.position.x = Math.max(0, x);
+      node.position.y = Math.max(0, y);
     },
     nodeEndDrag () {
       document.onmouseup = null;
