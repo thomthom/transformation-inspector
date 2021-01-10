@@ -232,6 +232,12 @@ const NodeEditor = {
       // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/isPointInPath#checking_a_point_in_the_specified_path
 
+      // console.log(
+      //   'out x,y', out_x, out_y,
+      //   'in x,y', in_x, in_y,
+      // );
+
+      // ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(out_x, out_y);
       // ctx.lineTo(in_x, in_y);
@@ -248,6 +254,12 @@ const NodeEditor = {
       ctx.arc(out_x, out_y, radius, 0, angle);
       ctx.arc(in_x, in_y, radius, 0, angle);
       ctx.fill();
+
+      // ctx.lineWidth = 1;
+      // ctx.beginPath();
+      // ctx.rect(out_bounds.left + 0.5, out_bounds.top + 0.5, out_bounds.width, out_bounds.height);
+      // ctx.rect(in_bounds.left + 0.5, in_bounds.top + 0.5, in_bounds.width, in_bounds.height);
+      // ctx.stroke();
     },
 
     getConnectorById: function(id) {
@@ -279,7 +291,7 @@ const NodeEditor = {
       // TODO: Prevent node from being moved to negative X and Y.
       node.position.x = (node.position.x + event.movementX);
       node.position.y = (node.position.y + event.movementY);
-      this.draw_node_connections(); // TODO: Only redraw what changed
+      this.$nextTick(this.draw_node_connections);
     },
     nodeEndDrag () {
       document.onmouseup = null;
@@ -292,4 +304,4 @@ const NodeEditor = {
   },
 }
 
-Vue.createApp(NodeEditor).mount('#editor');
+const app = Vue.createApp(NodeEditor).mount('#editor');
