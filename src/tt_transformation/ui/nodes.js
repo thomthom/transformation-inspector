@@ -359,9 +359,9 @@ const NodeEditor = {
     },
 
     nodeDragMouseDown: function(event) {
-      event.preventDefault();
-      document.onmousemove = this.nodeDrag;
-      document.onmouseup = this.nodeEndDrag;
+      event.preventDefault(); // Prevent native drag.
+      document.addEventListener('mousemove', this.nodeDrag, { capture: true });
+      document.addEventListener('mouseup', this.nodeEndDrag, { capture: true });
 
       const node_element = event.target.closest('section.node');
       const nodeId = parseInt(node_element.dataset.nodeId);
@@ -374,9 +374,9 @@ const NodeEditor = {
       node.position.x = Math.max(0, x);
       node.position.y = Math.max(0, y);
     },
-    nodeEndDrag () {
-      document.onmouseup = null;
-      document.onmousemove = null;
+    nodeEndDrag: function() {
+      document.removeEventListener('mousemove', this.nodeDrag, { capture: true });
+      document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
     }
   },
   mounted() {
