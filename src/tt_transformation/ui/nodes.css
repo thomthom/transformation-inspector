@@ -14,6 +14,15 @@ body {
   margin: 0;
 }
 
+/*
+This made the node connections not render properly upon first render. (Firefox)
+And since this is all from the local machine (file:///) it doesn't seem to
+be of much use anyway.
+*/
+/* [v-cloak] {
+  display: none;
+} */
+
 #canvas {
   position: fixed;
   width: 100%;

@@ -20,6 +20,7 @@
       <div class="label">{{ node.label }}</div>
     </header>
 
+    <!--
     <section class="position">
       <header>Position:</header>
       <div>
@@ -31,6 +32,13 @@
         <span class="value">{{ node.position.y }}</span>
       </div>
     </section>
+    -->
+
+    <node-position
+      :id="node.id"
+      :x="node.position.x" :y="node.position.y"
+      @move="onNodeMove">
+    </node-position>
 
     <section class="config">
       <header>Config:</header>

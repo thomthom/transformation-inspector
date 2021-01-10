@@ -277,6 +277,12 @@ const NodeEditor = {
       return this.nodes.find(node => node.id == id);
     },
 
+    onNodeMove: function(nodeId, x, y) {
+      // console.log('onNodeMove', nodeId, x, y);
+      // TODO: Debounce this call? In case multiple nodes are updated in bulk.
+      this.$nextTick(this.draw_node_connections);
+    },
+
     nodeDragMouseDown: function(event) {
       event.preventDefault();
       document.onmousemove = this.nodeDrag;
@@ -291,7 +297,6 @@ const NodeEditor = {
       // TODO: Prevent node from being moved to negative X and Y.
       node.position.x = (node.position.x + event.movementX);
       node.position.y = (node.position.y + event.movementY);
-      this.$nextTick(this.draw_node_connections);
     },
     nodeEndDrag () {
       document.onmouseup = null;
@@ -304,4 +309,25 @@ const NodeEditor = {
   },
 }
 
-const app = Vue.createApp(NodeEditor).mount('#editor');
+const app = Vue.createApp(NodeEditor);
+
+// Kludge! Ideally the whole node would be a component. But since
+// we're not using single file components it's awkward to edit the template
+// inline in a JS template string.
+app.component('node-position', {
+  props: ['id', 'x', 'y'],
+  emits: ['move'],
+  watch: {
+    x(oldX, newX) {
+      // console.log('x', oldX, newX);
+      this.$emit('move', this.id, this.x, this.y);
+    },
+    y(oldY, newY) {
+      // console.log('y', oldY, newY);
+      this.$emit('move', this.id, this.x, this.y);
+    },
+  },
+  template: `<section class="position"><b>Position:</b> {{ x }}, {{ y }}</section>`
+});
+
+const vm = app.mount('#editor');
