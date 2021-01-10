@@ -10,9 +10,19 @@ html {
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 10pt;
+
+  cursor: default;
 }
 body {
   margin: 0;
+}
+
+* {
+  cursor: inherit;
+}
+input, select, textarea, a[href]
+{
+  cursor: auto;
 }
 
 /*
