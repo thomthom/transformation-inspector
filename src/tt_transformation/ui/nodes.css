@@ -23,7 +23,7 @@ be of much use anyway.
   display: none;
 } */
 
-#canvas {
+#canvasNodes {
   position: fixed;
   width: 100%;
   height: 100%;

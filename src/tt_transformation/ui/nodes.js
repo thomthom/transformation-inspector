@@ -1,3 +1,5 @@
+// @ts-check
+
 // Test data:
 const testNodes = [
   {
@@ -165,6 +167,19 @@ const testNodes = [
   }
 ];
 
+class Point2d {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+};
+
+class Rectangle {
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
+  }
+};
 
 // The Application
 const NodeEditor = {
@@ -177,14 +192,24 @@ const NodeEditor = {
     }
   },
   methods: {
+    /**
+     * @param {string} id
+     */
+    getCanvasById: function(id) {
+      return /** @type{HTMLCanvasElement | null} */ (document.getElementById(id));
+    },
+    /** @return {HTMLCanvasElement | null} */
+    getNodeCanvas: function() {
+      return this.getCanvasById('canvasNodes');
+    },
     resize_canvas: function() {
-      const canvas = document.getElementById('canvas');
+      const canvas = this.getNodeCanvas();
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       this.draw_node_connections();
     },
     draw_node_connections: function() {
-      const canvas = document.getElementById('canvas');
+      const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -196,22 +221,20 @@ const NodeEditor = {
       ctx.strokeStyle = 'orange';
       ctx.lineWidth = 2;
 
+      /** @type {NodeListOf<HTMLElement>} */
       const outputs = document.querySelectorAll('.node > .output > .connector');
       for (const output_element of outputs) {
         const outputId = parseInt(output_element.dataset.connectorId);
         const output = this.getConnectorById(outputId);
-        // console.log('output', outputId)
         for (const partner of output.partners) {
-          // console.log('  partner', partner);
           // const input = this.getConnectorById(partner);
           const query = `[data-connector-id='${partner}']`;
           const input_element = document.querySelector(query);
-          // console.log('  input_element', input_element);
-          this.draw_connection(ctx, output_element, input_element);
+          this.draw_node_connection(ctx, output_element, input_element);
         }
       }
     },
-    draw_connection: function(ctx, output_element, input_element) {
+    draw_node_connection: function(ctx, output_element, input_element) {
       // TODO:
       // If you need the bounding rectangle relative to the top-left corner of
       // the document, just add the current scrolling position to the top and
@@ -221,12 +244,12 @@ const NodeEditor = {
       const out_bounds = output_element.getBoundingClientRect();
       const out_x = out_bounds.right;
       const out_y = out_bounds.top + Math.round(out_bounds.height / 2);
+      const out_pt = new Point2d(out_x, out_y);
 
       const in_bounds = input_element.getBoundingClientRect();
       const in_x = in_bounds.left;
       const in_y = in_bounds.top + Math.round(in_bounds.height / 2);
-
-      const dx = Math.round((out_x - in_x) / 2);
+      const in_pt = new Point2d(in_x, in_y);
 
       // TODO: Use Path2d so we can check for points in a path/stroke.
       // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
@@ -237,29 +260,36 @@ const NodeEditor = {
       //   'in x,y', in_x, in_y,
       // );
 
-      // ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(out_x, out_y);
-      // ctx.lineTo(in_x, in_y);
-      ctx.bezierCurveTo(
-        out_x - dx, out_y,
-        in_x + dx, in_y,
-        in_x, in_y,
-      );
-      ctx.stroke();
-
-      const radius = 3;
-      const angle = Math.PI * 2;
-      ctx.beginPath();
-      ctx.arc(out_x, out_y, radius, 0, angle);
-      ctx.arc(in_x, in_y, radius, 0, angle);
-      ctx.fill();
-
       // ctx.lineWidth = 1;
       // ctx.beginPath();
       // ctx.rect(out_bounds.left + 0.5, out_bounds.top + 0.5, out_bounds.width, out_bounds.height);
       // ctx.rect(in_bounds.left + 0.5, in_bounds.top + 0.5, in_bounds.width, in_bounds.height);
       // ctx.stroke();
+
+      this.draw_connection(ctx, out_pt, in_pt);
+    },
+    /**
+     * @param {CanvasRenderingContext2D} [ctx]
+     * @param {Point2d} [pt1]
+     * @param {Point2d} [pt2]
+     */
+    draw_connection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
+      const dx = Math.round((pt1.x - pt2.x) / tension);
+
+      ctx.beginPath();
+      ctx.moveTo(pt1.x, pt1.y);
+      ctx.bezierCurveTo(
+        pt1.x - dx, pt1.y,
+        pt2.x + dx, pt2.y,
+        pt2.x, pt2.y,
+      );
+      ctx.stroke();
+
+      const angle = Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(pt1.x, pt1.y, radius, 0, angle);
+      ctx.arc(pt2.x, pt2.y, radius, 0, angle);
+      ctx.fill();
     },
 
     getConnectorById: function(id) {
