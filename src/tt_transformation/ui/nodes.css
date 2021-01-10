@@ -5,6 +5,7 @@
 
 html {
   background-color: #333;
+  background-image: url('images/grid-50x50.png');
   color: #fff;
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
