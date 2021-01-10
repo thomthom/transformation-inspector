@@ -175,6 +175,18 @@ class Point2d {
     this.x = x;
     this.y = y;
   }
+  /**
+   * @param {Point2d} point
+   * @return {number} */
+  distance(point) {
+    return Math.sqrt((point.x - this.x)**2 + (point.y - this.y)**2);
+  }
+  /**
+   * @param {Point2d} point
+   * @return {boolean} */
+  within_distance(point, distance) {
+    return ((point.x - this.x)**2 + (point.y - this.y)**2) < distance**2;
+  }
 };
 
 class Size {
@@ -199,7 +211,15 @@ const NodeEditor = {
       nodes: testNodes,
       drag: {
         node: undefined,
-      }
+      },
+      connectors: {
+        input: new Map(),
+        output: new Map(),
+      },
+      tool: {
+        cursor: undefined,
+        pick: undefined,
+      },
     }
   },
   methods: {
@@ -213,11 +233,95 @@ const NodeEditor = {
     getNodeCanvas: function() {
       return this.getCanvasById('canvasNodes');
     },
+    getToolCanvas: function() {
+      return this.getCanvasById('canvasTools');
+    },
     resizeCanvas: function() {
-      const canvas = this.getNodeCanvas();
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const nodeCanvas = this.getNodeCanvas();
+      nodeCanvas.width = window.innerWidth;
+      nodeCanvas.height = window.innerHeight;
+
+      const toolCanvas = this.getToolCanvas();
+      toolCanvas.width = window.innerWidth;
+      toolCanvas.height = window.innerHeight;
+
       this.drawNodeConnections();
+      this.drawTool();
+    },
+    updateConnectors: function() {
+      const outputs = this.getConnectorElements(ConnectorType.Output);
+      this.connectors.output = this.computeConnectorPoints(outputs, ConnectorType.Output);
+
+      const inputs = this.getConnectorElements(ConnectorType.Input);
+      this.connectors.input = this.computeConnectorPoints(inputs, ConnectorType.Input);
+    },
+    /**
+     * @param {MouseEvent} event
+     */
+    toolMove: function(event) {
+      // console.log('mouse', event.x, event.y);
+      this.tool.cursor = new Point2d(event.x, event.y);
+
+      // Snap to connector points.
+      const aperture = 8;
+      const cursor = this.tool.cursor;
+      let pick = undefined;
+      for (const [id, pt] of this.connectors.input) {
+        if (cursor.within_distance(pt, aperture)) {
+          pick = { id: id, position: pt };
+          break;
+        }
+      }
+      if (pick === undefined) {
+        for (const [id, pt] of this.connectors.output) {
+          if (cursor.within_distance(pt, aperture)) {
+            pick = { id: id, position: pt };
+            break;
+          }
+        }
+      }
+      this.tool.pick = pick;
+
+      this.drawTool();
+    },
+    drawTool: function() {
+      const canvas = this.getToolCanvas();
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const radius = 1.5;
+      ctx.fillStyle = '#c00';
+      for (const [_id, pt] of this.connectors.output) {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (const [_id, pt] of this.connectors.input) {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      let pt = this.tool.cursor;
+      if (this.tool.pick) {
+        pt = this.tool.pick.position;
+      }
+      if (pt) {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    },
+    /**
+     * @param {ConnectorType} type
+     */
+    getConnectorElements: function(type) {
+      const typeStr = (type == ConnectorType.Input) ? 'input' : 'output';
+      const query = `.node > .${typeStr} > .connector`;
+      /** @type {NodeListOf<HTMLElement>} */
+      const outputs = document.querySelectorAll(query);
+      return outputs
     },
     /**
      * @param {NodeListOf<HTMLElement>} elements
@@ -263,14 +367,11 @@ const NodeEditor = {
       // ctx.fillStyle = '#0f02';
       // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      /** @type {NodeListOf<HTMLElement>} */
-      const outputs = document.querySelectorAll('.node > .output > .connector');
-      const outputPoints = this.computeConnectorPoints(outputs, ConnectorType.Output);
+      const outputs = this.getConnectorElements(ConnectorType.Output);
+      const outputPoints = this.connectors.output;
       this.drawConnectionPoints(ctx, outputPoints.values(), ConnectorType.Output);
 
-      /** @type {NodeListOf<HTMLElement>} */
-      const inputs = document.querySelectorAll('.node > .input > .connector');
-      const inputPoints = this.computeConnectorPoints(inputs, ConnectorType.Input);
+      const inputPoints = this.connectors.input;
       this.drawConnectionPoints(ctx, inputPoints.values(), ConnectorType.Input);
 
       for (const output_element of outputs) {
@@ -355,7 +456,13 @@ const NodeEditor = {
     onNodeMove: function(nodeId, x, y) {
       // console.log('onNodeMove', nodeId, x, y);
       // TODO: Debounce this call? In case multiple nodes are updated in bulk.
-      this.$nextTick(this.drawNodeConnections);
+      // this.$nextTick(this.drawNodeConnections);
+      this.$nextTick(function() {
+        // console.log('nextTick');
+        this.updateConnectors();
+        this.drawNodeConnections();
+        this.drawTool();
+      });
     },
 
     nodeDragMouseDown: function(event) {
@@ -380,8 +487,10 @@ const NodeEditor = {
     }
   },
   mounted() {
+    this.updateConnectors();
     // TODO: Listen to viewport size change.
     this.resizeCanvas();
+    document.addEventListener('mousemove', this.toolMove);
   },
 }
 
