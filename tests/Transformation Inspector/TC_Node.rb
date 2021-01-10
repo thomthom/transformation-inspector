@@ -71,6 +71,28 @@ module Tests
       assert_equal(expected, tr2_node.output(:geom).data)
     end
 
+    def test_to_h_connector_ids
+      points = [
+        Geom::Point3d.new(1, 2, 3),
+        Geom::Point3d.new(4, 5, 6),
+      ]
+      pts_node = PointsNode.new(points: points)
+
+      tr1 = Geom::Transformation.scaling(1, 2, 3)
+      tr1_node = TransformationNode.new(transformation: tr1)
+      tr1_node.input(:geom).connect_to(pts_node.output(:geom))
+
+      pts_hash = pts_node.to_h
+      expected = tr1_node.input(:geom).object_id
+      actual = pts_hash[:output][0][:partners][0]
+      assert_equal(expected, actual, 'wrong partner ID for output')
+
+      tr1_hash = tr1_node.to_h
+      expected = pts_node.output(:geom).object_id
+      actual = tr1_hash[:input][0][:partner]
+      assert_equal(expected, actual, 'wrong partner ID for input')
+    end
+
   end
 end
 end

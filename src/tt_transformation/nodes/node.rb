@@ -127,7 +127,9 @@ module TT::Plugins::TransformationInspector
       end
 
       # @private
+      # @param [OutputConnectionPoint] output
       def partner=(output)
+        raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
         @partner = output
       end
 
@@ -256,7 +258,7 @@ module TT::Plugins::TransformationInspector
         input.partner.partners.delete(self)
       end
       input.partner = output
-      output.partners << self
+      output.partners << input
       invalidate_cache
       # trigger_event(:update, self)
       nil
