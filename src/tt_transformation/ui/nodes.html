@@ -34,11 +34,9 @@
     </section>
     -->
 
-    <node-position
-      :id="node.id"
-      :x="node.position.x" :y="node.position.y"
+    <node-watcher :node="node"
       @move="onNodeMove">
-    </node-position>
+    </node-watcher>
 
     <section class="config">
       <header>Config:</header>

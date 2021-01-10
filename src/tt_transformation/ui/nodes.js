@@ -314,20 +314,17 @@ const app = Vue.createApp(NodeEditor);
 // Kludge! Ideally the whole node would be a component. But since
 // we're not using single file components it's awkward to edit the template
 // inline in a JS template string.
-app.component('node-position', {
-  props: ['id', 'x', 'y'],
+app.component('node-watcher', {
+  props: ['node'],
   emits: ['move'],
-  watch: {
-    x(oldX, newX) {
-      // console.log('x', oldX, newX);
-      this.$emit('move', this.id, this.x, this.y);
-    },
-    y(oldY, newY) {
-      // console.log('y', oldY, newY);
-      this.$emit('move', this.id, this.x, this.y);
-    },
+  created() {
+    this.$watch(
+      () => this.node.position,
+      (position) => { this.$emit('move', this.node.id, position.x, position.y); },
+      { deep: true }
+    );
   },
-  template: `<section class="position"><b>Position:</b> {{ x }}, {{ y }}</section>`
+  template: `<section class="position"><b>Position:</b> {{ node.position.x }}, {{ node.position.y }}</section>`
 });
 
 const vm = app.mount('#editor');
