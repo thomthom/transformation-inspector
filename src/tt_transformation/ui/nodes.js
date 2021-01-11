@@ -65,6 +65,13 @@ const testNodes = [
         "channel_id": "geom",
         "node": 10460,
         "partner": 10520
+      },
+      {
+        "id": 11540,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 10460,
+        "partner": null
       }
     ],
     "output": [
@@ -123,6 +130,13 @@ const testNodes = [
         "channel_id": "geom",
         "node": 10480,
         "partner": 10560
+      },
+      {
+        "id": 11600,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 10480,
+        "partner": null
       }
     ],
     "output": [
@@ -165,7 +179,74 @@ const testNodes = [
         1.0
       ]
     }
+  },
+  {
+    "id": 1860,
+    "type": "TransformationNode",
+    "label": "Untitled",
+    "position": {
+      "x": 350.0,
+      "y": 400.0
+    },
+    "input": [
+      {
+        "id": 1880,
+        "type": "InputConnectionPoint",
+        "channel_id": "geom",
+        "node": 1860,
+        "partner": null
+      },
+      {
+        "id": 1900,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 1860,
+        "partner": null
+      }
+    ],
+    "output": [
+      {
+        "id": 1920,
+        "type": "OutputConnectionPoint",
+        "channel_id": "geom",
+        "node": 1860,
+        "partners": [
+
+        ]
+      },
+      {
+        "id": 1940,
+        "type": "OutputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 1860,
+        "partners": [
+
+        ]
+      }
+    ],
+    "config": {
+      "transformation": [
+        0.8660254037844386,
+        0.5,
+        0.0,
+        0.0,
+        -0.5,
+        0.8660254037844386,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
   }
+
+
 ];
 
 class Point2d {
