@@ -219,6 +219,7 @@ const NodeEditor = {
       tool: {
         cursor: undefined,
         pick: undefined,
+        startPick: undefined,
       },
     }
   },
@@ -256,32 +257,56 @@ const NodeEditor = {
       this.connectors.input = this.computeConnectorPoints(inputs, ConnectorType.Input);
     },
     /**
-     * @param {MouseEvent} event
+     * @param {Point2d} point
      */
-    toolMouseMove: function(event) {
-      // console.log('mouse', event.x, event.y);
-      this.tool.cursor = new Point2d(event.x, event.y);
-
-      // Snap to connector points.
+    toolPickConnector(point) {
       const aperture = 8;
-      const cursor = this.tool.cursor;
       let pick = undefined;
       for (const [id, pt] of this.connectors.input) {
-        if (cursor.within_distance(pt, aperture)) {
+        if (point.within_distance(pt, aperture)) {
           pick = { id: id, position: pt };
           break;
         }
       }
       if (pick === undefined) {
         for (const [id, pt] of this.connectors.output) {
-          if (cursor.within_distance(pt, aperture)) {
+          if (point.within_distance(pt, aperture)) {
             pick = { id: id, position: pt };
             break;
           }
         }
       }
-      this.tool.pick = pick;
-
+      return pick;
+    },
+    /**
+     * @param {MouseEvent} event
+     */
+    toolMouseDown: function(event) {
+      console.log('toolMouseDown', event.x, event.y);
+      if (this.tool.pick) {
+        event.preventDefault();
+        this.tool.startPick = this.tool.pick;
+        this.drawTool();
+      }
+    },
+    /**
+     * @param {MouseEvent} event
+     */
+    toolMouseUp: function(event) {
+      console.log('toolMouseUp', event.x, event.y);
+      if (this.tool.startPick) {
+        // TODO: Create connector.
+      }
+      this.tool.startPick = undefined;
+      this.drawTool();
+    },
+    /**
+     * @param {MouseEvent} event
+     */
+    toolMouseMove: function(event) {
+      // console.log('toolMouseMove', event.x, event.y);
+      this.tool.cursor = new Point2d(event.x, event.y);
+      this.tool.pick = this.toolPickConnector(this.tool.cursor );
       this.drawTool();
     },
     drawTool: function() {
@@ -311,6 +336,15 @@ const NodeEditor = {
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
         ctx.fill();
+      }
+
+      if (this.tool.startPick) {
+        const point = this.tool.pick?.position || this.tool.cursor;
+
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#fff';
+
+        this.drawConnection(ctx, this.tool.startPick.position, point);
       }
     },
     /**
@@ -374,6 +408,8 @@ const NodeEditor = {
       const inputPoints = this.connectors.input;
       this.drawConnectionPoints(ctx, inputPoints.values(), ConnectorType.Input);
 
+      ctx.fillStyle = 'orange';
+      ctx.strokeStyle = 'orange';
       for (const output_element of outputs) {
         const outputId = parseInt(output_element.dataset.connectorId);
         const output = this.getConnectorById(outputId);
@@ -392,8 +428,6 @@ const NodeEditor = {
     drawConnection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
       const dx = Math.round((pt1.x - pt2.x) / tension);
 
-      ctx.fillStyle = 'orange';
-      ctx.strokeStyle = 'orange';
       ctx.lineWidth = 2;
 
       ctx.beginPath();
@@ -491,6 +525,8 @@ const NodeEditor = {
     // TODO: Listen to viewport size change.
     this.resizeCanvas();
     document.addEventListener('mousemove', this.toolMouseMove);
+    document.addEventListener('mousedown', this.toolMouseDown);
+    document.addEventListener('mouseup', this.toolMouseUp);
   },
 }
 
