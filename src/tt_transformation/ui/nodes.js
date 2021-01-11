@@ -204,6 +204,17 @@ const ConnectorType = {
   Output: 1,
 };
 
+class NodeSocket {
+  /** @param {ConnectorType} [type] */
+  /** @param {any} [connector] */
+  /** @param {Point2d} [position] */
+  constructor(type, connector, position) {
+    this.type = type;
+    this.connector = connector;
+    this.position = position;
+  }
+};
+
 // The Application
 const NodeEditor = {
   data() {
@@ -258,34 +269,69 @@ const NodeEditor = {
     },
     /**
      * @param {Point2d} point
+     * @return {NodeSocket | null}
      */
     toolPickConnector(point) {
       const aperture = 8;
-      let pick = undefined;
-      for (const [id, pt] of this.connectors.input) {
-        if (point.within_distance(pt, aperture)) {
-          pick = { id: id, position: pt };
-          break;
+      for (const [id, socket] of this.connectors.input) {
+        if (point.within_distance(socket.position, aperture)) {
+          return socket;
         }
       }
-      if (pick === undefined) {
-        for (const [id, pt] of this.connectors.output) {
-          if (point.within_distance(pt, aperture)) {
-            pick = { id: id, position: pt };
-            break;
+      for (const [id, socket] of this.connectors.output) {
+        if (point.within_distance(socket.position, aperture)) {
+          return socket;
+        }
+      }
+      return null;
+    },
+    toolIsPickValid() {
+      if (!this.tool.startPick) {
+        return false;
+      }
+      const startPick = this.tool.startPick;
+      if (this.tool.pick) {
+        const pick = this.tool.pick;
+
+        // Connect Input to Output and vice-versa.
+        const type = (startPick.type == ConnectorType.Input) ? ConnectorType.Output : ConnectorType.Input;
+        if (pick.type != type) {
+          return false;
+        }
+
+        // Connect to compatible Channel ID.
+        const channelId = startPick.connector.channel_id;
+        if (pick.connector.channel_id != channelId) {
+          return false;
+        }
+
+        // Don't connect to itself.
+        const node = startPick.connector.node;
+        if (pick.connector.node == node) {
+          return false;
+        }
+
+        // Don't connect multiple outputs to an input.
+        if (startPick.type == ConnectorType.Output) {
+          if (pick.connector.partner) {
+            return false;
           }
         }
+
+        // Don't connect into a recursive loop.
+        // TODO: ...
       }
-      return pick;
+      return true;
     },
     /**
      * @param {MouseEvent} event
      */
     toolMouseDown: function(event) {
-      console.log('toolMouseDown', event.x, event.y);
+      // console.log('toolMouseDown', event.x, event.y);
       if (this.tool.pick) {
         event.preventDefault();
         this.tool.startPick = this.tool.pick;
+        // TODO: Check if existing connection was picked.
         this.drawTool();
       }
     },
@@ -293,8 +339,11 @@ const NodeEditor = {
      * @param {MouseEvent} event
      */
     toolMouseUp: function(event) {
-      console.log('toolMouseUp', event.x, event.y);
-      if (this.tool.startPick) {
+      // console.log('toolMouseUp', event.x, event.y);
+      if (this.tool.startPick && this.toolIsPickValid()) {
+        const node1 = this.tool.startPick.connector.node;
+        const node2 = this.tool.pick.connector.node;
+        console.log(`TODO: Connect ${node1} to ${node2}`);
         // TODO: Create connector.
       }
       this.tool.startPick = undefined;
@@ -317,12 +366,14 @@ const NodeEditor = {
 
       const radius = 1.5;
       ctx.fillStyle = '#c00';
-      for (const [_id, pt] of this.connectors.output) {
+      for (const [_id, socket] of this.connectors.output) {
+        const pt = socket.position;
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
         ctx.fill();
       }
-      for (const [_id, pt] of this.connectors.input) {
+      for (const [_id, socket] of this.connectors.input) {
+        const pt = socket.position;
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
         ctx.fill();
@@ -340,9 +391,10 @@ const NodeEditor = {
 
       if (this.tool.startPick) {
         const point = this.tool.pick?.position || this.tool.cursor;
+        const color = this.toolIsPickValid() ? '#fff' : '#c00';
 
-        ctx.fillStyle = '#fff';
-        ctx.strokeStyle = '#fff';
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
 
         this.drawConnection(ctx, this.tool.startPick.position, point);
       }
@@ -360,7 +412,7 @@ const NodeEditor = {
     /**
      * @param {NodeListOf<HTMLElement>} elements
      * @param {ConnectorType} type
-     * @return {Map<number, Point2d>}
+     * @return {Map<number, NodeSocket>}
      */
     computeConnectorPoints: function(elements, type) {
       // TODO:
@@ -373,12 +425,14 @@ const NodeEditor = {
       // TODO: Use Path2d so we can check for points in a path/stroke.
       // https://developer.mozilla.org/en-US/docs/Web/API/Path2D/Path2D
       // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/isPointInPath#checking_a_point_in_the_specified_path
+      /** @type {Map<number,NodeSocket>} */
       let connections = new Map();
       for (const element of elements) {
         const nodeElement = element.closest('.node');
         const nodeBounds = nodeElement.getBoundingClientRect();
 
         const connectorId = parseInt(element.dataset.connectorId);
+        const connector = this.getConnectorById(connectorId);
         const bounds = element.getBoundingClientRect();
         let position = new Point2d(0, 0);
         if (type == ConnectorType.Output) {
@@ -388,11 +442,13 @@ const NodeEditor = {
           position.x = nodeBounds.left + 1;
           position.y = bounds.top + Math.round(bounds.height / 2);
         }
-        connections.set(connectorId, position);
+        let socket = new NodeSocket(type, connector, position);
+        connections.set(connectorId, socket);
       }
       return connections;
     },
     drawNodeConnections: function() {
+      console.log('drawNodeConnections');
       const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
 
@@ -402,20 +458,23 @@ const NodeEditor = {
       // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const outputs = this.getConnectorElements(ConnectorType.Output);
-      const outputPoints = this.connectors.output;
-      this.drawConnectionPoints(ctx, outputPoints.values(), ConnectorType.Output);
+      const outputConnections = this.connectors.output;
+      const outputPoints = Array.from(outputConnections).map(socket => socket[1].position);
+      console.log(outputPoints);
+      this.drawConnectionPoints(ctx, outputPoints, ConnectorType.Output);
 
-      const inputPoints = this.connectors.input;
-      this.drawConnectionPoints(ctx, inputPoints.values(), ConnectorType.Input);
+      const inputConnections = this.connectors.input;
+      const inputPoints = Array.from(inputConnections).map(socket => socket[1].position);
+      this.drawConnectionPoints(ctx, inputPoints, ConnectorType.Input);
 
       ctx.fillStyle = 'orange';
       ctx.strokeStyle = 'orange';
       for (const output_element of outputs) {
         const outputId = parseInt(output_element.dataset.connectorId);
         const output = this.getConnectorById(outputId);
-        const outPoint = outputPoints.get(outputId);
+        const outPoint = outputConnections.get(outputId).position;
         for (const partner of output.partners) {
-          const inPoint = inputPoints.get(partner);
+          const inPoint = inputConnections.get(partner).position;
           this.drawConnection(ctx, outPoint, inPoint);
         }
       }
@@ -447,7 +506,7 @@ const NodeEditor = {
     },
     /**
      * @param {CanvasRenderingContext2D} ctx
-     * @param {IterableIterator<Point2d>} points
+     * @param {Array<Point2d>} points
      * @param {ConnectorType} type
      * @param {number} radius
      */
