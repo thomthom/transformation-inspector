@@ -76,6 +76,10 @@ module TT::Plugins::TransformationInspector
     puts JSON.pretty_generate(points_node.to_h)
     puts JSON.pretty_generate(tr_node1.to_h)
     puts JSON.pretty_generate(tr_node2.to_h)
+
+    tr3 = Geom::Transformation.rotation(ORIGIN, Z_AXIS, 30.degrees)
+    tr_node3 = TransformationNode.new(transformation: tr3)
+    puts JSON.pretty_generate(tr_node3.to_h)
     nil
   end
 
