@@ -289,38 +289,39 @@ const NodeEditor = {
       if (!this.tool.startPick) {
         return false;
       }
-      const startPick = this.tool.startPick;
-      if (this.tool.pick) {
-        const pick = this.tool.pick;
-
-        // Connect Input to Output and vice-versa.
-        const type = (startPick.type == ConnectorType.Input) ? ConnectorType.Output : ConnectorType.Input;
-        if (pick.type != type) {
-          return false;
-        }
-
-        // Connect to compatible Channel ID.
-        const channelId = startPick.connector.channel_id;
-        if (pick.connector.channel_id != channelId) {
-          return false;
-        }
-
-        // Don't connect to itself.
-        const node = startPick.connector.node;
-        if (pick.connector.node == node) {
-          return false;
-        }
-
-        // Don't connect multiple outputs to an input.
-        if (startPick.type == ConnectorType.Output) {
-          if (pick.connector.partner) {
-            return false;
-          }
-        }
-
-        // Don't connect into a recursive loop.
-        // TODO: ...
+      if (!this.tool.pick) {
+        return false;
       }
+      const startPick = this.tool.startPick;
+      const pick = this.tool.pick;
+
+      // Connect Input to Output and vice-versa.
+      const type = (startPick.type == ConnectorType.Input) ? ConnectorType.Output : ConnectorType.Input;
+      if (pick.type != type) {
+        return false;
+      }
+
+      // Connect to compatible Channel ID.
+      const channelId = startPick.connector.channel_id;
+      if (pick.connector.channel_id != channelId) {
+        return false;
+      }
+
+      // Don't connect to itself.
+      const node = startPick.connector.node;
+      if (pick.connector.node == node) {
+        return false;
+      }
+
+      // Don't connect multiple outputs to an input.
+      if (startPick.type == ConnectorType.Output) {
+        if (pick.connector.partner) {
+          return false;
+        }
+      }
+
+      // Don't connect into a recursive loop.
+      // TODO: ...
       return true;
     },
     /**
@@ -364,6 +365,7 @@ const NodeEditor = {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      /* DEBUG
       const radius = 1.5;
       ctx.fillStyle = '#c00';
       for (const [_id, socket] of this.connectors.output) {
@@ -388,13 +390,37 @@ const NodeEditor = {
         ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
         ctx.fill();
       }
+      */
+
+      const radius = 1.5;
+      ctx.fillStyle = '#fff';
+      if (this.tool.pick) {
+        const pt = this.tool.pick.position;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       if (this.tool.startPick) {
-        const point = this.tool.pick?.position || this.tool.cursor;
-        const color = this.toolIsPickValid() ? '#fff' : '#c00';
+        const startPick = this.tool.startPick;
+        const pick = this.tool.pick;
+        let dash = [2, 2]; // Dashed (Not connected)
+        let point = this.tool.cursor;
+        let color = '#fff';
+        if (pick) {
+          point = pick.position;
+          dash = []; // Solid (Connected)
+          // Only display warning color if the connection pick has an input and
+          // and output.
+          if (startPick.connector.id != pick.connector.id && !this.toolIsPickValid()) {
+            color = '#c00';
+          } else {
+          }
+        }
 
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
+        ctx.setLineDash(dash);
 
         this.drawConnection(ctx, this.tool.startPick.position, point);
       }
@@ -448,7 +474,6 @@ const NodeEditor = {
       return connections;
     },
     drawNodeConnections: function() {
-      console.log('drawNodeConnections');
       const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
 
@@ -460,7 +485,6 @@ const NodeEditor = {
       const outputs = this.getConnectorElements(ConnectorType.Output);
       const outputConnections = this.connectors.output;
       const outputPoints = Array.from(outputConnections).map(socket => socket[1].position);
-      console.log(outputPoints);
       this.drawConnectionPoints(ctx, outputPoints, ConnectorType.Output);
 
       const inputConnections = this.connectors.input;
