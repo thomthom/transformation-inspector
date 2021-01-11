@@ -118,7 +118,7 @@ module TT::Plugins::TransformationInspector
 
       def to_h
         super.merge({
-          partner: partner.object_id
+          partner: partner&.object_id
         })
       end
 
@@ -193,9 +193,15 @@ module TT::Plugins::TransformationInspector
 
       # @type [Hash<Symbol, InputConnectionPoint>]
       @input = {}
+      self.class.input_channels.keys.each { |channel_id|
+        @input[channel_id] = InputConnectionPoint.new(channel_id, self)
+      }
 
       # @type [Hash<Symbol, OutputConnectionPoint>]
       @output = {}
+      self.class.output_channels.keys.each { |channel_id|
+        @output[channel_id] = OutputConnectionPoint.new(channel_id, self)
+      }
     end
 
 
@@ -219,7 +225,7 @@ module TT::Plugins::TransformationInspector
 
     # @param [Symbol] channel_id
     def has_input?(channel_id)
-      @input.key?(channel_id)
+      !@input[channel_id].partner.nil?
     end
 
     # @param [Symbol] channel_id
@@ -227,14 +233,13 @@ module TT::Plugins::TransformationInspector
     # @raise [InvalidChannelId] if the channel id is not valid
     def input(channel_id)
       raise InvalidChannelId, "#{channel_id}" unless self.class.input_channels.key?(channel_id)
-      @input[channel_id] ||= InputConnectionPoint.new(channel_id, self)
       @input[channel_id]
     end
 
 
     # @param [Symbol] channel_id
     def has_output?(channel_id)
-      @output.key?(channel_id)
+      !@output[channel_id].partners.empty?
     end
 
     # @param [Symbol] channel_id
@@ -242,7 +247,6 @@ module TT::Plugins::TransformationInspector
     # @raise [InvalidChannelId] if the channel id is not valid
     def output(channel_id)
       raise InvalidChannelId, "#{channel_id}" unless self.class.output_channels.key?(channel_id)
-      @output[channel_id] ||= OutputConnectionPoint.new(channel_id, self)
       @output[channel_id]
     end
 
@@ -272,7 +276,7 @@ module TT::Plugins::TransformationInspector
         id: object_id,
         type: typename.to_sym,
         label: @label,
-        position: { x: @position.x, y: position.y },
+        position: { x: @position.x.to_f, y: position.y.to_f },
         input: @input.values.map!(&:to_h),
         output: @output.values.map!(&:to_h),
         config: config_to_hash,
