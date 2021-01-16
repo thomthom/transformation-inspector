@@ -403,6 +403,7 @@ const NodeEditor = {
       return this.getCanvasById('canvasTools');
     },
     resizeCanvas: function() {
+      console.log('resizeCanvas');
       const nodeCanvas = this.getNodeCanvas();
       nodeCanvas.width = window.innerWidth;
       nodeCanvas.height = window.innerHeight;
@@ -807,8 +808,8 @@ const NodeEditor = {
   },
   mounted() {
     this.updateConnectors();
-    // TODO: Listen to viewport size change.
     this.resizeCanvas();
+    window.addEventListener('resize', this.resizeCanvas);
     document.addEventListener('mousemove', this.toolMouseMove);
     document.addEventListener('mousedown', this.toolMouseDown);
     document.addEventListener('mouseup', this.toolMouseUp);
