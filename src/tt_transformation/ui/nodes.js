@@ -339,10 +339,38 @@ const NodeEditor = {
       } else {
         const input = this.getConnectorById(inputId);
         const output = this.getConnectorById(outputId);
-        console.log('input', input);
-        console.log('output', output);
+        // console.log('input', input);
+        // console.log('output', output);
         input.partner = output.id;
         output.partners.push(input.id);
+        this.$nextTick(function() { // TODO: do automatically.
+          this.updateConnectors();
+          this.drawNodeConnections();
+        });
+      }
+    },
+    /**
+     * @param {number} inputId Connector id
+     * @param {number} outputId Connector id
+     */
+    disconnect: function(inputId, outputId) {
+      if (isSketchUp) {
+        console.log('sketchup.disconnect', inputId, outputId);
+        sketchup.disconnect(inputId, outputId);
+      } else {
+        const input = this.getConnectorById(inputId);
+        const output = this.getConnectorById(outputId);
+        // console.log('input', input);
+        // console.log('output', output);
+
+        input.partner = null;
+
+        const i = output.partners.lastIndexOf(input.id);
+        if (i !== -1) {
+          output.partners.splice(i, 1);
+        }
+        // output.partners.delete(input.id);
+
         this.$nextTick(function() { // TODO: do automatically.
           this.updateConnectors();
           this.drawNodeConnections();
@@ -457,6 +485,7 @@ const NodeEditor = {
             inputSocket.editing = true;
             this.tool.startPick = outputSocket;
             this.tool.editing.input = inputSocket;
+            this.tool.editing.output = outputSocket;
             this.drawNodeConnections();
           }
         }
@@ -470,6 +499,13 @@ const NodeEditor = {
     toolMouseUp: function(event) {
       // console.log('toolMouseUp', event.x, event.y);
       if (this.tool.editing.input) {
+        if (!this.tool.pick) {
+          const connector1 = this.tool.editing.input.connector;
+          const connector2 = this.tool.editing.output.connector;
+
+          console.log(`Disconnect node ${connector1.node}:${connector1.id} to node ${connector2.node}:${connector2.id}`);
+          this.disconnect(connector1.id, connector2.id);
+        }
         this.tool.editing.input.editing = false;
         this.tool.editing.input = undefined;
         this.drawNodeConnections();

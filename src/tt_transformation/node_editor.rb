@@ -51,6 +51,9 @@ class NodeEditor
     dialog.add_action_callback('connect') do |ctx, input_id, output_id|
       connect(dialog, input_id, output_id)
     end
+    dialog.add_action_callback('disconnect') do |ctx, input_id, output_id|
+      disconnect(dialog, input_id, output_id)
+    end
   end
 
   def show_node_editor
@@ -91,6 +94,19 @@ class NodeEditor
     p output
     input.connect_to(output)
     update(dialog) # TODO: Use notifications
+  end
+
+  # @param [UI::HtmlDialog] dialog
+  def disconnect(dialog, input_id, output_id)
+    puts "Disconnect #{input_id} to #{output_id}"
+    # @type [Node::InputConnectionPoint]
+    input = ObjectSpace._id2ref(input_id)
+    # @type [Node::OutputConnectionPoint]
+    output = ObjectSpace._id2ref(output_id)
+    p input
+    p output
+    # input.disconnect_from(output) # TODO:
+    # update(dialog) # TODO: Use notifications
   end
 
   def create_dummy_nodes
