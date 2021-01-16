@@ -14,7 +14,7 @@
   <section class="node"
     :data-node-id="node.id"
     :style="{ left: node.position.x + 'px', top: node.position.y + 'px' }"
-    v-for="node in nodes">
+    v-for="node in nodes" :key="node.id">
 
     <header @mousedown="nodeDragMouseDown">
       <div>{{ $filters.nodeType(node.type) }}<span class="debug"> ({{ node.id }})</span></div>
@@ -41,7 +41,7 @@
 
     <section class="config">
       <header>Config</header>
-      <div v-for="(value, key)  in node.config">
+      <div v-for="(value, key) in node.config">
         <span class="key">{{ key }}: </span>
         <span class="value">{{ value }}</span>
       </div>
@@ -51,7 +51,7 @@
       <header>Input</header>
       <div class="connector"
         :title="input.id + ' -> ' + input.partner"
-        :data-connector-id="input.id"  v-for="input in node.input">
+        :data-connector-id="input.id"  v-for="input in node.input" :key="input.id">
         {{ input.channel_id }}<span class="debug"> ({{ input.id }})</span>
         <!--
         <div class="partner">
@@ -65,7 +65,7 @@
       <header>Output</header>
       <div class="connector"
         :title="output.id"
-        :data-connector-id="output.id"  v-for="output in node.output">
+        :data-connector-id="output.id"  v-for="output in node.output" :key="output.id">
         <span class="debug">({{ output.id }}) </span>{{ output.channel_id }}
         <!--
         <div class="partner" v-for="partner in output.partners">
