@@ -3,6 +3,7 @@ require 'tt_transformation/nodes/points'
 require 'tt_transformation/nodes/transformation'
 
 require 'tt_transformation/nodes/example'
+require 'tt_transformation/node_editor'
 
 require 'tt_transformation/transformation_helper'
 require 'tt_transformation/instance'
@@ -25,6 +26,7 @@ module TT::Plugins::TransformationInspector
     menu_name = Sketchup.version.to_f < 21.1 ? 'Plugins' : 'Developer'
     menu = UI.menu(menu_name)
     menu.add_item(cmd_inspector)
+    menu.add_item('Node Editor') { self.node_editor }
 
     if Sketchup.version.to_i >= 16
       toolbar = UI::Toolbar.new('Transformation Inspector')
@@ -38,6 +40,12 @@ module TT::Plugins::TransformationInspector
   MATRIX_WIDTH = 400
   MATRIX_COLLAPSED_HEIGHT = 470
   MATRIX_EXPANDED_HEIGHT = 1000
+
+  def self.node_editor
+    @node_editor ||= NodeEditor.new
+    @node_editor.show
+  end
+
 
   def self.inspect_transformation
     width  = MATRIX_WIDTH
@@ -229,6 +237,8 @@ module TT::Plugins::TransformationInspector
   def self.reload
     original_verbose = $VERBOSE
     $VERBOSE = nil
+    @node_editor&.close
+    @node_editor = nil
     @window&.close
     @window = nil
     # rubocop:disable SketchupSuggestions/FileEncoding

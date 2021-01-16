@@ -297,11 +297,18 @@ class NodeSocket {
   }
 };
 
+let defaultNodes = [];
+const isSketchUp = typeof sketchup !== 'undefined';
+if (!isSketchUp) {
+  console.info('Not running in context of SketchUp; loading test data...');
+  defaultNodes = testNodes;
+}
+
 // The Application
 const NodeEditor = {
   data() {
     return {
-      nodes: testNodes,
+      nodes: defaultNodes,
       drag: {
         node: undefined,
       },
@@ -321,6 +328,12 @@ const NodeEditor = {
     }
   },
   methods: {
+    connect: function(inputId, outputId) {
+      if (isSketchUp) {
+        console.log('sketchup.connect', inputId, outputId);
+        sketchup.connect(inputId, outputId);
+      }
+    },
     /**
      * @param {string} id
      */
@@ -449,6 +462,7 @@ const NodeEditor = {
         const node1 = this.tool.startPick.connector.node;
         const node2 = this.tool.pick.connector.node;
         console.log(`TODO: Connect ${node1} to ${node2}`);
+        this.connect(node1, node2); // TODO: input node first.
         // TODO: Create connector.
       }
       this.tool.startPick = undefined;
@@ -727,6 +741,11 @@ const NodeEditor = {
     document.addEventListener('mousemove', this.toolMouseMove);
     document.addEventListener('mousedown', this.toolMouseDown);
     document.addEventListener('mouseup', this.toolMouseUp);
+
+    if (isSketchUp) {
+      console.log('sketchup.ready');
+      sketchup.ready();
+    }
   },
 }
 
@@ -763,3 +782,15 @@ app.component('node-watcher', {
 });
 
 const vm = app.mount('#editor');
+
+function updateNodes(nodes) {
+  console.log('updateNodes', nodes);
+  vm.nodes = nodes;
+  // TODO: Do this automatically when nodes changes.
+  vm.$nextTick(function() {
+    // console.log('nextTick');
+    vm.updateConnectors();
+    vm.drawNodeConnections();
+    // vm.drawTool();
+  });
+}

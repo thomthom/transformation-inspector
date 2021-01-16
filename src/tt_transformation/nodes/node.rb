@@ -205,6 +205,13 @@ module TT::Plugins::TransformationInspector
     end
 
 
+    # @param [Geom::Point2d] point
+    def position=(point)
+      raise TypeError unless point.is_a?(Geom::Point2d)
+      @position = point
+    end
+
+
     # @param [Symbol] key
     def config(key)
       raise InvalidConfigKey, "invalid config key: #{key}" unless @config.key?(key)
