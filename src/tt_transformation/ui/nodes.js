@@ -461,7 +461,7 @@ const NodeEditor = {
       }
       if (this.tool.startPick && this.toolIsPickValid()) {
         let sockets = [this.tool.startPick, this.tool.pick];
-        if (sockets[0].type == ConnectorType.Input) {
+        if (sockets[0].type == ConnectorType.Output) {
           sockets.reverse();
         }
 
