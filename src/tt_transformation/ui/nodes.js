@@ -435,14 +435,15 @@ const NodeEditor = {
         // TODO: Check if existing connection was picked.
         if (this.tool.startPick.connector.type == 'InputConnectionPoint') {
           const inputSocket = this.tool.pick;
-          inputSocket.editing = true;
-          this.tool.editing.input = inputSocket;
 
           const outputId = inputSocket.connector.partner;
           const outputSocket = this.getSocketById(outputId);
-          this.tool.startPick = outputSocket;
-
-          this.drawNodeConnections();
+          if (outputSocket) {
+            inputSocket.editing = true;
+            this.tool.startPick = outputSocket;
+            this.tool.editing.input = inputSocket;
+            this.drawNodeConnections();
+          }
         }
 
         this.drawTool();
