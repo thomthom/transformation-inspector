@@ -48,6 +48,9 @@ class NodeEditor
     dialog.add_action_callback('ready') do |ctx|
       ready(dialog)
     end
+    dialog.add_action_callback('sync_position') do |ctx, node_id, position|
+      sync_position(dialog, node_id, Geom::Point2d.new(*position))
+    end
     dialog.add_action_callback('connect') do |ctx, input_id, output_id|
       connect(dialog, input_id, output_id)
     end
@@ -78,6 +81,16 @@ class NodeEditor
     nodes_data = @nodes.map(&:to_h)
     nodes_json = JSON.pretty_generate(nodes_data)
     dialog.execute_script("updateNodes(#{nodes_json})")
+  end
+
+  # @param [UI::HtmlDialog] dialog
+  # @param [Integer] node_id
+  # @param [Geom::Point2d] position
+  def sync_position(dialog, node_id, position)
+    puts "sync_position #{node_id}: #{position.inspect}"
+    # @type [Node]
+    node = ObjectSpace._id2ref(node_id)
+    node.position = position
   end
 
   # @param [UI::HtmlDialog] dialog

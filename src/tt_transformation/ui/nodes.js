@@ -268,6 +268,12 @@ class Point2d {
   within_distance(point, distance) {
     return ((point.x - this.x)**2 + (point.y - this.y)**2) < distance**2;
   }
+  /**
+   * @return [Array]
+   */
+  to_a() {
+    return [this.x, this.y];
+  }
 };
 
 class Size {
@@ -375,6 +381,12 @@ const NodeEditor = {
           this.updateConnectors();
           this.drawNodeConnections();
         });
+      }
+    },
+    sync_position: function(node) {
+      if (isSketchUp) {
+        console.log('sketchup.sync_position', node.id, node.position);
+        sketchup.sync_position(node.id, [node.position.x, node.position.y]);
       }
     },
     /**
@@ -787,9 +799,10 @@ const NodeEditor = {
       node.position.y = Math.max(0, y);
     },
     nodeEndDrag: function() {
-      // TODO: Update position in Ruby.
       document.removeEventListener('mousemove', this.nodeDrag, { capture: true });
       document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
+      this.sync_position(this.drag.node);
+      this.drag.node = undefined;
     }
   },
   mounted() {
