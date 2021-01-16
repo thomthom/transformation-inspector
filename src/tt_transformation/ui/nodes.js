@@ -293,6 +293,7 @@ class NodeSocket {
     this.type = type;
     this.connector = connector;
     this.position = position;
+    this.editing = false;
   }
 };
 
@@ -304,14 +305,18 @@ const NodeEditor = {
       drag: {
         node: undefined,
       },
-      connectors: {
-        input: new Map(),
-        output: new Map(),
+      connectors: { // TODO: Rename to sockets
+        input: new Map(), // Map<number, NodeSocket>
+        output: new Map(), // Map<number, NodeSocket>
       },
       tool: {
-        cursor: undefined,
-        pick: undefined,
-        startPick: undefined,
+        cursor: undefined, // Point2d
+        pick: undefined, // NodeSocket | null
+        startPick: undefined, // NodeSocket | null
+        // Existing socket connection being edited.
+        // input: NodeSocket
+        // output: NodeSocket
+        editing: { input: undefined, output: undefined },
       },
     }
   },
@@ -413,7 +418,20 @@ const NodeEditor = {
       if (this.tool.pick) {
         event.preventDefault();
         this.tool.startPick = this.tool.pick;
+
         // TODO: Check if existing connection was picked.
+        if (this.tool.startPick.connector.type == 'InputConnectionPoint') {
+          const inputSocket = this.tool.pick;
+          inputSocket.editing = true;
+          this.tool.editing.input = inputSocket;
+
+          const outputId = inputSocket.connector.partner;
+          const outputSocket = this.getSocketById(outputId);
+          this.tool.startPick = outputSocket;
+
+          this.drawNodeConnections();
+        }
+
         this.drawTool();
       }
     },
@@ -422,6 +440,11 @@ const NodeEditor = {
      */
     toolMouseUp: function(event) {
       // console.log('toolMouseUp', event.x, event.y);
+      if (this.tool.editing.input) {
+        this.tool.editing.input.editing = false;
+        this.tool.editing.input = undefined;
+        this.drawNodeConnections();
+      }
       if (this.tool.startPick && this.toolIsPickValid()) {
         const node1 = this.tool.startPick.connector.node;
         const node2 = this.tool.pick.connector.node;
@@ -493,7 +516,7 @@ const NodeEditor = {
           dash = []; // Solid (Connected)
           // Only display warning color if the connection pick has an input and
           // and output.
-          if (startPick.connector.id != pick.connector.id && !this.toolIsPickValid()) {
+          if (!pick.editing && startPick.connector.id != pick.connector.id && !this.toolIsPickValid()) {
             color = '#c00';
           } else {
           }
@@ -505,6 +528,9 @@ const NodeEditor = {
 
         this.drawConnection(ctx, this.tool.startPick.position, point);
       }
+    },
+    getSocketById: function(id) {
+      return this.connectors.input.get(id) || this.connectors.output.get(id);
     },
     /**
      * @param {ConnectorType} type
@@ -579,8 +605,18 @@ const NodeEditor = {
         const output = this.getConnectorById(outputId);
         const outPoint = outputConnections.get(outputId).position;
         for (const partner of output.partners) {
-          const inPoint = inputConnections.get(partner).position;
-          this.drawConnection(ctx, outPoint, inPoint);
+          const inputSocket = inputConnections.get(partner);
+          if (inputSocket.editing) {
+            console.log('Editing connection...')
+            ctx.fillStyle = '#222';
+            ctx.strokeStyle = '#222';
+            ctx.setLineDash([2, 2]);
+          } else {
+            ctx.fillStyle = 'orange';
+            ctx.strokeStyle = 'orange';
+            ctx.setLineDash([]);
+          }
+          this.drawConnection(ctx, outPoint, inputSocket.position);
         }
       }
     },
