@@ -328,10 +328,25 @@ const NodeEditor = {
     }
   },
   methods: {
+    /**
+     * @param {number} inputId Connector id
+     * @param {number} outputId Connector id
+     */
     connect: function(inputId, outputId) {
       if (isSketchUp) {
         console.log('sketchup.connect', inputId, outputId);
         sketchup.connect(inputId, outputId);
+      } else {
+        const input = this.getConnectorById(inputId);
+        const output = this.getConnectorById(outputId);
+        console.log('input', input);
+        console.log('output', output);
+        input.partner = output.id;
+        output.partners.push(input.id);
+        this.$nextTick(function() { // TODO: do automatically.
+          this.updateConnectors();
+          this.drawNodeConnections();
+        });
       }
     },
     /**
