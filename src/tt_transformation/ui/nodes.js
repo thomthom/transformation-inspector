@@ -459,11 +459,16 @@ const NodeEditor = {
         this.drawNodeConnections();
       }
       if (this.tool.startPick && this.toolIsPickValid()) {
-        const node1 = this.tool.startPick.connector.node;
-        const node2 = this.tool.pick.connector.node;
-        console.log(`TODO: Connect ${node1} to ${node2}`);
-        this.connect(node1, node2); // TODO: input node first.
-        // TODO: Create connector.
+        let sockets = [this.tool.startPick, this.tool.pick];
+        if (sockets[0].type == ConnectorType.Input) {
+          sockets.reverse();
+        }
+
+        const connector1 = sockets[0].connector;
+        const connector2 = sockets[1].connector;
+
+        console.log(`Connect node ${connector1.node}:${connector1.id} to node ${connector2.node}:${connector2.id}`);
+        this.connect(connector1.id, connector2.id);
       }
       this.tool.startPick = undefined;
       this.drawTool();
@@ -730,6 +735,7 @@ const NodeEditor = {
       node.position.y = Math.max(0, y);
     },
     nodeEndDrag: function() {
+      // TODO: Update position in Ruby.
       document.removeEventListener('mousemove', this.nodeDrag, { capture: true });
       document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
     }

@@ -68,6 +68,10 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   def ready(dialog)
     puts "Ready"
+    update(dialog)
+  end
+
+  def update(dialog)
     nodes_data = @nodes.map(&:to_h)
     nodes_json = JSON.pretty_generate(nodes_data)
     dialog.execute_script("updateNodes(#{nodes_json})")
@@ -76,12 +80,17 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   def connect(dialog, input_id, output_id)
     puts "Connect #{input_id} to #{output_id}"
+    # @type [Node::InputConnectionPoint]
     input = ObjectSpace._id2ref(input_id)
+    # @type [Node::OutputConnectionPoint]
     output = ObjectSpace._id2ref(output_id)
-    p input
-    p output
+    # TODO: Handle possible error?
     # ObjectSpace._id2ref(880)
     # Error: #<RangeError: "880" is recycled object>
+    p input
+    p output
+    input.connect_to(output)
+    update(dialog) # TODO: Use notifications
   end
 
   def create_dummy_nodes
