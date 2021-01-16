@@ -94,6 +94,11 @@ class NodeEditor
     p output
     input.connect_to(output)
     update(dialog) # TODO: Use notifications
+    # update(dialog) do
+    #   # Use notifications to collect changed nodes and propagate updates
+    #   # for only those to the webdialog.
+    #   input.connect_to(output)
+    # end
   end
 
   # @param [UI::HtmlDialog] dialog
@@ -105,8 +110,8 @@ class NodeEditor
     output = ObjectSpace._id2ref(output_id)
     p input
     p output
-    # input.disconnect_from(output) # TODO:
-    # update(dialog) # TODO: Use notifications
+    input.disconnect_from(output)
+    update(dialog) # TODO: Use notifications
   end
 
   def create_dummy_nodes

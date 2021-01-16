@@ -111,6 +111,11 @@ module TT::Plugins::TransformationInspector
         node.connect(self, output)
       end
 
+      # @param [OutputConnectionPoint] output
+      def disconnect_from(output)
+        node.disconnect(self, output)
+      end
+
       def data
         raise MissingInput, "missing input on: #{channel_id}" if partner.nil?
         partner.data
@@ -129,7 +134,7 @@ module TT::Plugins::TransformationInspector
       # @private
       # @param [OutputConnectionPoint] output
       def partner=(output)
-        raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
+        raise TypeError, "got #{output.class}" unless output.nil? || output.is_a?(OutputConnectionPoint)
         @partner = output
       end
 
@@ -150,6 +155,11 @@ module TT::Plugins::TransformationInspector
       # @param [InputConnectionPoint] input
       def connect_to(input)
         node.connect(input, self)
+      end
+
+      # @param [InputConnectionPoint] input
+      def disconnect_from(input)
+        node.disconnect(input, self)
       end
 
       def data
@@ -261,7 +271,6 @@ module TT::Plugins::TransformationInspector
     # @param [InputConnectionPoint] input
     # @param [OutputConnectionPoint] output
     def connect(input, output)
-      # TODO: node.connect(input, output)
       raise TypeError, "got #{input.class}" unless input.is_a?(InputConnectionPoint)
       raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
       raise RecursiveConnection, "cannot connect to itself" if input.node == output.node
@@ -270,6 +279,19 @@ module TT::Plugins::TransformationInspector
       end
       input.partner = output
       output.partners << input
+      invalidate_cache
+      # trigger_event(:update, self)
+      nil
+    end
+
+    # @param [InputConnectionPoint] input
+    # @param [OutputConnectionPoint] output
+    def disconnect(input, output)
+      raise TypeError, "got #{input.class}" unless input.is_a?(InputConnectionPoint)
+      raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
+      # TODO: Validate there is a connection.
+      input.partner = nil
+      output.partners.delete(input)
       invalidate_cache
       # trigger_event(:update, self)
       nil
