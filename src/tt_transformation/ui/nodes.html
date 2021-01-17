@@ -46,7 +46,7 @@
         <span class="value">{{ value }}</span>
       </div>
       -->
-      <component :is="node.type" :config="node.config"></component>
+      <component :is="node.type" :node-id="node.id" :config="node.config"></component>
     </section>
 
     <section class="input">

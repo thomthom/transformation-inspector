@@ -48,14 +48,17 @@ class NodeEditor
     dialog.add_action_callback('ready') do |ctx|
       ready(dialog)
     end
-    dialog.add_action_callback('sync_position') do |ctx, node_id, position|
-      sync_position(dialog, node_id, Geom::Point2d.new(*position))
-    end
     dialog.add_action_callback('connect') do |ctx, input_id, output_id|
       connect(dialog, input_id, output_id)
     end
     dialog.add_action_callback('disconnect') do |ctx, input_id, output_id|
       disconnect(dialog, input_id, output_id)
+    end
+    dialog.add_action_callback('sync_position') do |ctx, node_id, position|
+      sync_position(dialog, node_id, Geom::Point2d.new(*position))
+    end
+    dialog.add_action_callback('sync_transformation') do |ctx, node_id, transformation|
+      sync_transformation(dialog, node_id, transformation)
     end
   end
 
@@ -91,6 +94,15 @@ class NodeEditor
     # @type [Node]
     node = ObjectSpace._id2ref(node_id)
     node.position = position
+  end
+
+  def sync_transformation(dialog, node_id, transformation)
+    puts "sync_position #{node_id}: #{transformation.inspect}"
+    # @type [TransformationNode]
+    node = ObjectSpace._id2ref(node_id)
+    tr = Geom::Transformation.new(*transformation)
+    node.set_config(:transformation, tr)
+    # TODO: trigger output update
   end
 
   # @param [UI::HtmlDialog] dialog

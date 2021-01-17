@@ -854,7 +854,7 @@ app.component('node-watcher', {
 });
 
 app.component('TransformationNode', {
-  props: ['config'],
+  props: ['nodeId', 'config'],
   computed: {
     matrix() {
       // Transpose from column major to row major.
@@ -870,6 +870,18 @@ app.component('TransformationNode', {
       });
       return matrix;
     }
+  },
+  created() {
+    this.$watch(
+      () => this.config.transformation,
+      (transformation) => {
+        if (isSketchUp) {
+          console.log('sketchup.sync_transformation');
+          sketchup.sync_transformation(this.nodeId, Object.values(transformation));
+        }
+      },
+      { deep: true }
+    );
   },
   template: `
   <div>
