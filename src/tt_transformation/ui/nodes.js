@@ -847,9 +847,82 @@ app.component('node-watcher', {
     );
   },
   template: `
-  <section class="position">
+  <section class="node-watcher">
     <b>Position</b> {{ node.position.x }}, {{ node.position.y }}
   </section>
+  `
+});
+
+app.component('TransformationNode', {
+  props: ['config'],
+  computed: {
+    matrix() {
+      // Transpose from column major to row major.
+      const transpose_indices = [
+        0, 4,  8, 12,
+        1, 5,  9, 13,
+        2, 6, 10, 14,
+        3, 7, 11, 15,
+      ];
+      const matrix = this.config.transformation.map((_v, i) => {
+        const index = transpose_indices[i];
+        return this.config.transformation[index];
+      });
+      return matrix;
+    }
+  },
+  template: `
+  <div>
+    <table class="node-matrix-4x4">
+
+    <colgroup>
+      <col width="25%">
+      <col width="25%">
+      <col width="25%">
+      <col width="25%">
+    </colgroup>
+
+    <tbody>
+      <tr>
+        <td><input type="text" v-model.number="config.transformation[0]" /></td>
+        <td><input type="text" v-model.number="config.transformation[4]" /></td>
+        <td><input type="text" v-model.number="config.transformation[8]" /></td>
+        <td><input type="text" v-model.number="config.transformation[12]" /></td>
+      </tr>
+
+      <tr>
+        <td><input type="text" v-model.number="config.transformation[1]" /></td>
+        <td><input type="text" v-model.number="config.transformation[5]" /></td>
+        <td><input type="text" v-model.number="config.transformation[9]" /></td>
+        <td><input type="text" v-model.number="config.transformation[13]" /></td>
+      </tr>
+
+      <tr>
+        <td><input type="text" v-model.number="config.transformation[2]" /></td>
+        <td><input type="text" v-model.number="config.transformation[6]" /></td>
+        <td><input type="text" v-model.number="config.transformation[10]" /></td>
+        <td><input type="text" v-model.number="config.transformation[14]" /></td>
+      </tr>
+
+      <tr>
+        <td><input type="text" v-model.number="config.transformation[3]" /></td>
+        <td><input type="text" v-model.number="config.transformation[7]" /></td>
+        <td><input type="text" v-model.number="config.transformation[11]" /></td>
+        <td><input type="text" v-model.number="config.transformation[15]" /></td>
+      </tr>
+    </tbody>
+
+    </table>
+  </div>
+  `
+});
+
+app.component('PointsNode', {
+  props: ['config'],
+  template: `
+  <div>
+    Points: {{ config.points.length }}
+  </div>
   `
 });
 

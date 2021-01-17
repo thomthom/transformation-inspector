@@ -35,16 +35,18 @@
     </section>
     -->
 
-    <node-watcher :node="node"
-      @move="onNodeMove">
+    <node-watcher :node="node" @move="onNodeMove">
     </node-watcher>
 
     <section class="config">
+      <!--
       <header>Config</header>
       <div v-for="(value, key) in node.config">
         <span class="key">{{ key }}: </span>
         <span class="value">{{ value }}</span>
       </div>
+      -->
+      <component :is="node.type" :config="node.config"></component>
     </section>
 
     <section class="input">

@@ -76,6 +76,9 @@ be of much use anyway.
 .node > header > .label {
   color: #aaa;
 }
+.node-watcher {
+  display: none;
+}
 
 .node .debug {
   color: #aaa;
@@ -99,4 +102,15 @@ be of much use anyway.
 .node .partner {
   display: inline;
   color: #aaa;
+}
+
+
+.node-matrix-4x4 {
+  box-sizing: border-box;
+  width: 100%;
+}
+.node-matrix-4x4 input {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 100%;
 }
