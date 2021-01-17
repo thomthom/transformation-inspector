@@ -17,6 +17,11 @@ body {
   margin: 0;
 }
 
+input, select, textarea {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 10pt;
+}
+
 * {
   cursor: inherit;
 }
