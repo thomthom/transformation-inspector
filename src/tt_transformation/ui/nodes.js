@@ -314,7 +314,12 @@ if (!isSketchUp) {
 const NodeEditor = {
   data() {
     return {
+      nodeTypes: [
+        { id: 'PointsNode', label: "Points" },
+        { id: 'TransformationNode', label: "Transformation" },
+      ],
       nodes: defaultNodes,
+      updating: false,
       drag: {
         node: undefined,
       },
@@ -334,6 +339,14 @@ const NodeEditor = {
     }
   },
   methods: {
+    newNode: function(item) {
+      if (isSketchUp) {
+        console.log('sketchup.new_node', item.id);
+        sketchup.new_node(item.id);
+      } else {
+        console.info('TODO: new node:', item.id);
+      }
+    },
     /**
      * @param {number} inputId Connector id
      * @param {number} outputId Connector id
@@ -384,9 +397,20 @@ const NodeEditor = {
       }
     },
     sync_position: function(node) {
+      if (this.updating) return;
       if (isSketchUp) {
         console.log('sketchup.sync_position', node.id, node.position);
         sketchup.sync_position(node.id, [node.position.x, node.position.y]);
+      }
+    },
+    sync_transformation: function(nodeId, transformation) {
+      // console.log('sketchup.sync_transformation', nodeId);
+      // console.log('arguments', arguments);
+      if (this.updating) return;
+      if (isSketchUp) {
+        console.log('sketchup.sync_transformation', nodeId);
+        const values = Object.values(transformation);
+        sketchup.sync_transformation(nodeId, values);
       }
     },
     /**
@@ -784,9 +808,10 @@ const NodeEditor = {
     },
 
     nodeDragMouseDown: function(event) {
+      console.log('nodeDragMouseDown');
       event.preventDefault(); // Prevent native drag.
       document.addEventListener('mousemove', this.nodeDrag, { capture: true });
-      document.addEventListener('mouseup', this.nodeEndDrag, { capture: true });
+      document.addEventListener('mouseup', this.nodeEndDrag, { capture: true, once: true });
 
       const node_element = event.target.closest('section.node');
       const nodeId = parseInt(node_element.dataset.nodeId);
@@ -800,8 +825,9 @@ const NodeEditor = {
       node.position.y = Math.max(0, y);
     },
     nodeEndDrag: function() {
+      console.log('nodeEndDrag');
       document.removeEventListener('mousemove', this.nodeDrag, { capture: true });
-      document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
+      // document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
       this.sync_position(this.drag.node);
       this.drag.node = undefined;
     }
@@ -854,34 +880,23 @@ app.component('node-watcher', {
 });
 
 app.component('TransformationNode', {
-  props: ['nodeId', 'config'],
+  // Trying to bind nodeId will end up passing `undefined` to the receive of
+  // the emitted event even though the handler can access the value correctly.
+  // Renaming it to simply `node` and it works just fine. (??)
+  props: ['node', 'config'],
+  emits: ['sync_transformation'],
   computed: {
     matrix() {
-      // Transpose from column major to row major.
-      const transpose_indices = [
-        0, 4,  8, 12,
-        1, 5,  9, 13,
-        2, 6, 10, 14,
-        3, 7, 11, 15,
-      ];
-      const matrix = this.config.transformation.map((_v, i) => {
-        const index = transpose_indices[i];
-        return this.config.transformation[index];
-      });
-      return matrix;
-    }
+      return this.config.transformation;
+    },
   },
-  created() {
-    this.$watch(
-      () => this.config.transformation,
-      (transformation) => {
-        if (isSketchUp) {
-          console.log('sketchup.sync_transformation');
-          sketchup.sync_transformation(this.nodeId, Object.values(transformation));
-        }
-      },
-      { deep: true }
-    );
+  watch: {
+    matrix: {
+      deep: true,
+      handler(newMatrix) {
+        this.$emit('sync_transformation', this.node, newMatrix);
+      }
+    }
   },
   template: `
   <div>
@@ -896,31 +911,31 @@ app.component('TransformationNode', {
 
     <tbody>
       <tr>
-        <td><input class="rotate scale x" title="sX" v-model.number="config.transformation[0]" /></td>
-        <td><input class="rotate scale y" title="" v-model.number="config.transformation[4]" /></td>
-        <td><input class="rotate scale z" title="" v-model.number="config.transformation[8]" /></td>
-        <td><input class="translation x" title="Wx" v-model.number="config.transformation[12]" /></td>
+        <td><input class="rotate scale x" title="sX" v-model.number="matrix[0]" /></td>
+        <td><input class="rotate scale y" title="" v-model.number="matrix[4]" /></td>
+        <td><input class="rotate scale z" title="" v-model.number="matrix[8]" /></td>
+        <td><input class="translation x" title="Wx" v-model.number="matrix[12]" /></td>
       </tr>
 
       <tr>
-        <td><input class="rotate scale x" title="" v-model.number="config.transformation[1]" /></td>
-        <td><input class="rotate scale y" title="sY" v-model.number="config.transformation[5]" /></td>
-        <td><input class="rotate scale z" title="" v-model.number="config.transformation[9]" /></td>
-        <td><input class="translation y" title="Wy" v-model.number="config.transformation[13]" /></td>
+        <td><input class="rotate scale x" title="" v-model.number="matrix[1]" /></td>
+        <td><input class="rotate scale y" title="sY" v-model.number="matrix[5]" /></td>
+        <td><input class="rotate scale z" title="" v-model.number="matrix[9]" /></td>
+        <td><input class="translation y" title="Wy" v-model.number="matrix[13]" /></td>
       </tr>
 
       <tr>
-        <td><input class="rotate scale x" title="" v-model.number="config.transformation[2]" /></td>
-        <td><input class="rotate scale y" title="" v-model.number="config.transformation[6]" /></td>
-        <td><input class="rotate scale z" title="sZ" v-model.number="config.transformation[10]" /></td>
-        <td><input class="translation z" title="Wz" v-model.number="config.transformation[14]" /></td>
+        <td><input class="rotate scale x" title="" v-model.number="matrix[2]" /></td>
+        <td><input class="rotate scale y" title="" v-model.number="matrix[6]" /></td>
+        <td><input class="rotate scale z" title="sZ" v-model.number="matrix[10]" /></td>
+        <td><input class="translation z" title="Wz" v-model.number="matrix[14]" /></td>
       </tr>
 
       <tr>
-        <td><input class="unused" title="" v-model.number="config.transformation[3]" /></td>
-        <td><input class="unused" title="" v-model.number="config.transformation[7]" /></td>
-        <td><input class="unused" title="" v-model.number="config.transformation[11]" /></td>
-        <td><input class="scalar" title="Wt" v-model.number="config.transformation[15]" /></td>
+        <td><input class="unused" title="" v-model.number="matrix[3]" /></td>
+        <td><input class="unused" title="" v-model.number="matrix[7]" /></td>
+        <td><input class="unused" title="" v-model.number="matrix[11]" /></td>
+        <td><input class="scalar" title="Wt" v-model.number="matrix[15]" /></td>
       </tr>
     </tbody>
 
@@ -938,16 +953,59 @@ app.component('PointsNode', {
   `
 });
 
+app.component('toolbar-button-dropdown', {
+  props: ['items'],
+  emits: ['select'],
+  data() {
+    return { menu: false }
+  },
+  methods: {
+    select(item) {
+      console.log('select item:', item);
+      this.menu = false;
+      this.$emit('select', item);
+    },
+    mouseCapture(event) {
+      console.log('mouseCapture');
+      // console.log('target', event.target);
+      this.menu = false;
+    }
+  },
+  watch: {
+    menu(show) {
+      if (show) {
+        const board = document.getElementsByClassName('node-board')[0];
+        board.addEventListener('mousedown', this.mouseCapture, {
+          once: true,
+          passive: true,
+        });
+      }
+    }
+  },
+  template: `
+  <div class="node-toolbar-item">
+    <button @click="menu = !menu"><slot></slot></button>
+    <div v-show="menu" class="node-toolbar-dropdown">
+      <div v-for="item in items" :key="item.id" @click="select(item)">{{ item.label }}</div>
+    </div>
+  </div>
+  `
+});
+
 const vm = app.mount('#editor');
 
 function updateNodes(nodes) {
   console.log('updateNodes', nodes);
+  vm.updating = true;
   vm.nodes = nodes;
+  // vm.updating = false;
+  console.log('> updateNodes', nodes);
   // TODO: Do this automatically when nodes changes.
   vm.$nextTick(function() {
     // console.log('nextTick');
     vm.updateConnectors();
     vm.drawNodeConnections();
     // vm.drawTool();
+    vm.updating = false;
   });
 }

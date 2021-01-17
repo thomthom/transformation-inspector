@@ -5,7 +5,7 @@
 
 html {
   background-color: #333;
-  background-image: url('images/grid-50x50.png');
+  /* background-image: url('images/grid-50x50.png'); */
   color: #fff;
 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -55,6 +55,15 @@ be of much use anyway.
   overflow: hidden;
   z-index: 10001;
   pointer-events: none;
+}
+
+.node-board {
+  position: fixed;
+  left: 0;
+  top: 40px;
+  width: 100%;
+  height: 100%;
+  background-image: url('images/grid-50x50.png');
 }
 
 .node {
@@ -149,4 +158,40 @@ be of much use anyway.
 .node-matrix-4x4 .unused {
   color: #333;
   background: #888;
+}
+
+.node-toolbar {
+  position: relative;
+  z-index: 10010;
+  display: block;
+  height: 40px;
+  /* background: rgba(0, 0, 0, 0.3); */
+  background: #222;
+  box-shadow: 0px 1px 5px #000;
+}
+.node-toolbar button {
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 10px;
+  width: 100%;
+  height: 40px;
+  color: #fff;
+  background: #333;
+  border: none;
+}
+.node-toolbar-item {
+  display: inline-block;
+}
+.node-toolbar-dropdown {
+  position: absolute;
+  /* background: #333; */
+  /* box-shadow: 0px 1px 5px #000; */
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.8);
+}
+.node-toolbar-dropdown > div {
+  padding: 5px 15px 5px 30px;
+}
+.node-toolbar-dropdown > div:hover {
+  background: rgba(255, 255, 255, 0.1);
 }

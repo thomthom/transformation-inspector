@@ -11,72 +11,86 @@
   <canvas id="canvasNodes"></canvas>
   <canvas id="canvasTools"></canvas>
 
-  <section class="node"
-    :data-node-id="node.id"
-    :style="{ left: node.position.x + 'px', top: node.position.y + 'px' }"
-    v-for="node in nodes" :key="node.id">
+  <section class="node-toolbar">
+    <toolbar-button-dropdown :items="nodeTypes" @select="newNode">
+      New Node...
+    </toolbar-button-dropdown>
+  </section>
 
-    <header @mousedown="nodeDragMouseDown">
-      <div>{{ $filters.nodeType(node.type) }}<span class="debug"> ({{ node.id }})</span></div>
-      <div class="label">{{ node.label }}</div>
-    </header>
+  <section class="node-board">
 
-    <!--
-    <section class="position">
-      <header>Position:</header>
-      <div>
-        <span class="key">X: </span>
-        <span class="value">{{ node.position.x }}</span>
-      </div>
-      <div>
-        <span class="key">Y: </span>
-        <span class="value">{{ node.position.y }}</span>
-      </div>
-    </section>
-    -->
+    <section class="node"
+      :data-node-id="node.id"
+      :style="{ left: node.position.x + 'px', top: node.position.y + 'px' }"
+      v-for="node in nodes" :key="node.id">
 
-    <node-watcher :node="node" @move="onNodeMove">
-    </node-watcher>
+      <header @mousedown="nodeDragMouseDown">
+        <div>{{ $filters.nodeType(node.type) }}<span class="debug"> ({{ node.id }})</span></div>
+        <div class="label">{{ node.label }}</div>
+      </header>
 
-    <section class="config">
       <!--
-      <header>Config</header>
-      <div v-for="(value, key) in node.config">
-        <span class="key">{{ key }}: </span>
-        <span class="value">{{ value }}</span>
-      </div>
+      <section class="position">
+        <header>Position:</header>
+        <div>
+          <span class="key">X: </span>
+          <span class="value">{{ node.position.x }}</span>
+        </div>
+        <div>
+          <span class="key">Y: </span>
+          <span class="value">{{ node.position.y }}</span>
+        </div>
+      </section>
       -->
-      <component :is="node.type" :node-id="node.id" :config="node.config"></component>
-    </section>
 
-    <section class="input">
-      <header>Input</header>
-      <div class="connector"
-        :title="input.id + ' -> ' + input.partner"
-        :data-connector-id="input.id"  v-for="input in node.input" :key="input.id">
-        {{ input.channel_id }}<span class="debug"> ({{ input.id }})</span>
+      <node-watcher :node="node" @move="onNodeMove">
+      </node-watcher>
+
+      <section class="config">
         <!--
-        <div class="partner">
-          OutputID: {{ input.partner }}
+        <header>Config</header>
+        <div v-for="(value, key) in node.config">
+          <span class="key">{{ key }}: </span>
+          <span class="value">{{ value }}</span>
         </div>
         -->
-      </div>
-    </section>
+        <component
+          :is="node.type"
+          :node="node.id"
+          :config="node.config"
+          @sync_transformation="sync_transformation">
+        </component>
+      </section>
 
-    <section class="output">
-      <header>Output</header>
-      <div class="connector"
-        :title="output.id"
-        :data-connector-id="output.id"  v-for="output in node.output" :key="output.id">
-        <span class="debug">({{ output.id }}) </span>{{ output.channel_id }}
-        <!--
-        <div class="partner" v-for="partner in output.partners">
-          InputID: {{ partner }}
+      <section class="input">
+        <header>Input</header>
+        <div class="connector"
+          :title="input.id + ' -> ' + input.partner"
+          :data-connector-id="input.id"  v-for="input in node.input" :key="input.id">
+          {{ input.channel_id }}<span class="debug"> ({{ input.id }})</span>
+          <!--
+          <div class="partner">
+            OutputID: {{ input.partner }}
+          </div>
+          -->
         </div>
-        -->
-      </div>
-    </section>
+      </section>
 
+      <section class="output">
+        <header>Output</header>
+        <div class="connector"
+          :title="output.id"
+          :data-connector-id="output.id"  v-for="output in node.output" :key="output.id">
+          <span class="debug">({{ output.id }}) </span>{{ output.channel_id }}
+          <!--
+          <div class="partner" v-for="partner in output.partners">
+            InputID: {{ partner }}
+          </div>
+          -->
+        </div>
+      </section>
+
+    </section>
   </section>
 </div>
 

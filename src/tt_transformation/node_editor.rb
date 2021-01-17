@@ -8,6 +8,8 @@ class NodeEditor
     # @type [UI::HtmlDialog]
     @dialog = nil
 
+    @updating = false
+
     # DEBUG
     @nodes = create_dummy_nodes
   end
@@ -21,6 +23,10 @@ class NodeEditor
   end
 
   private
+
+  def updating?
+    @updating
+  end
 
   # @return [UI::HtmlDialog]
   def create_node_editor
@@ -60,6 +66,9 @@ class NodeEditor
     dialog.add_action_callback('sync_transformation') do |ctx, node_id, transformation|
       sync_transformation(dialog, node_id, transformation)
     end
+    dialog.add_action_callback('new_node') do |ctx, node_type|
+      new_node(dialog, node_type)
+    end
   end
 
   def show_node_editor
@@ -83,24 +92,28 @@ class NodeEditor
   def update(dialog)
     nodes_data = @nodes.map(&:to_h)
     nodes_json = JSON.pretty_generate(nodes_data)
+    @updating = true
     dialog.execute_script("updateNodes(#{nodes_json})")
+    @updating = false
   end
 
   # @param [UI::HtmlDialog] dialog
   # @param [Integer] node_id
   # @param [Geom::Point2d] position
   def sync_position(dialog, node_id, position)
+    return if updating?
     puts "sync_position #{node_id}: #{position.inspect}"
     # @type [Node]
-    node = ObjectSpace._id2ref(node_id)
+    node = object_from_id(Node, node_id)
     node.position = position
   end
 
   def sync_transformation(dialog, node_id, transformation)
-    puts "sync_position #{node_id}: #{transformation.inspect}"
+    return if updating?
+    puts "sync_transformation #{node_id}: #{transformation.inspect}"
     # @type [TransformationNode]
-    node = ObjectSpace._id2ref(node_id)
-    tr = Geom::Transformation.new(*transformation)
+    node = object_from_id(TransformationNode, node_id)
+    tr = Geom::Transformation.new(transformation)
     node.set_config(:transformation, tr)
     # TODO: trigger output update
   end
@@ -109,12 +122,9 @@ class NodeEditor
   def connect(dialog, input_id, output_id)
     puts "Connect #{input_id} to #{output_id}"
     # @type [Node::InputConnectionPoint]
-    input = ObjectSpace._id2ref(input_id)
+    input = object_from_id(Node::InputConnectionPoint, input_id)
     # @type [Node::OutputConnectionPoint]
-    output = ObjectSpace._id2ref(output_id)
-    # TODO: Handle possible error?
-    # ObjectSpace._id2ref(880)
-    # Error: #<RangeError: "880" is recycled object>
+    output = object_from_id(Node::OutputConnectionPoint, output_id)
     p input
     p output
     input.connect_to(output)
@@ -130,13 +140,37 @@ class NodeEditor
   def disconnect(dialog, input_id, output_id)
     puts "Disconnect #{input_id} to #{output_id}"
     # @type [Node::InputConnectionPoint]
-    input = ObjectSpace._id2ref(input_id)
+    input = object_from_id(Node::InputConnectionPoint, input_id)
     # @type [Node::OutputConnectionPoint]
-    output = ObjectSpace._id2ref(output_id)
+    output = object_from_id(Node::OutputConnectionPoint, output_id)
     p input
     p output
     input.disconnect_from(output)
     update(dialog) # TODO: Use notifications
+  end
+
+  # @param [UI::HtmlDialog] dialog
+  # @param [String] node_type
+  def new_node(dialog, node_type)
+    # TODO: move nodes to Nodes namespace
+    # node_class = Nodes.const_get(node_type)
+    node_class = TT::Plugins::TransformationInspector.const_get(node_type)
+    node = node_class.new
+    @nodes << node
+    update(dialog)
+  end
+
+  # @param [Class] klass
+  # @param [Integer] id
+  def object_from_id(klass, id)
+    raise TypeError "id was not an integer" unless id.kind_of?(Integer)
+    value = ObjectSpace._id2ref(id)
+    # ObjectSpace._id2ref(880)
+    # Error: #<RangeError: "880" is recycled object>
+    unless value.kind_of?(klass)
+      raise TypeError "object was of type #{value.class}, expected #{klass}"
+    end
+    value
   end
 
   def create_dummy_nodes
