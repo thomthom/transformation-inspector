@@ -884,31 +884,31 @@ app.component('TransformationNode', {
 
     <tbody>
       <tr>
-        <td><input type="text" v-model.number="config.transformation[0]" /></td>
-        <td><input type="text" v-model.number="config.transformation[4]" /></td>
-        <td><input type="text" v-model.number="config.transformation[8]" /></td>
-        <td><input type="text" v-model.number="config.transformation[12]" /></td>
+        <td><input class="rotate scale x" title="sX" v-model.number="config.transformation[0]" /></td>
+        <td><input class="rotate scale y" title="" v-model.number="config.transformation[4]" /></td>
+        <td><input class="rotate scale z" title="" v-model.number="config.transformation[8]" /></td>
+        <td><input class="translation x" title="Wx" v-model.number="config.transformation[12]" /></td>
       </tr>
 
       <tr>
-        <td><input type="text" v-model.number="config.transformation[1]" /></td>
-        <td><input type="text" v-model.number="config.transformation[5]" /></td>
-        <td><input type="text" v-model.number="config.transformation[9]" /></td>
-        <td><input type="text" v-model.number="config.transformation[13]" /></td>
+        <td><input class="rotate scale x" title="" v-model.number="config.transformation[1]" /></td>
+        <td><input class="rotate scale y" title="sY" v-model.number="config.transformation[5]" /></td>
+        <td><input class="rotate scale z" title="" v-model.number="config.transformation[9]" /></td>
+        <td><input class="translation y" title="Wy" v-model.number="config.transformation[13]" /></td>
       </tr>
 
       <tr>
-        <td><input type="text" v-model.number="config.transformation[2]" /></td>
-        <td><input type="text" v-model.number="config.transformation[6]" /></td>
-        <td><input type="text" v-model.number="config.transformation[10]" /></td>
-        <td><input type="text" v-model.number="config.transformation[14]" /></td>
+        <td><input class="rotate scale x" title="" v-model.number="config.transformation[2]" /></td>
+        <td><input class="rotate scale y" title="" v-model.number="config.transformation[6]" /></td>
+        <td><input class="rotate scale z" title="sZ" v-model.number="config.transformation[10]" /></td>
+        <td><input class="translation z" title="Wz" v-model.number="config.transformation[14]" /></td>
       </tr>
 
       <tr>
-        <td><input type="text" v-model.number="config.transformation[3]" /></td>
-        <td><input type="text" v-model.number="config.transformation[7]" /></td>
-        <td><input type="text" v-model.number="config.transformation[11]" /></td>
-        <td><input type="text" v-model.number="config.transformation[15]" /></td>
+        <td><input class="unused" title="" v-model.number="config.transformation[3]" /></td>
+        <td><input class="unused" title="" v-model.number="config.transformation[7]" /></td>
+        <td><input class="unused" title="" v-model.number="config.transformation[11]" /></td>
+        <td><input class="scalar" title="Wt" v-model.number="config.transformation[15]" /></td>
       </tr>
     </tbody>
 

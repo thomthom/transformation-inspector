@@ -111,6 +111,37 @@ be of much use anyway.
 }
 .node-matrix-4x4 input {
   display: inline-block;
+  color: #000;
+  background: #ccc;
+  border: none;
+  padding: 2px 3px;
   box-sizing: border-box;
   width: 100%;
+}
+/* .node-matrix-4x4 tbody td:nth-of-type(2) input {
+  background: #eedddd;
+} */
+.node-matrix-4x4 .rotate.scale.x {
+  background: #eedddd;
+}
+.node-matrix-4x4 .rotate.scale.y {
+  background: #ddeedd;
+}
+.node-matrix-4x4 .rotate.scale.z {
+  background: #ddddee;
+}
+
+.node-matrix-4x4 .translation.x {
+  background: #eecccc;
+}
+.node-matrix-4x4 .translation.y {
+  background: #cceecc;
+}
+.node-matrix-4x4 .translation.z {
+  background: #ccccee;
+}
+
+.node-matrix-4x4 .unused {
+  color: #333;
+  background: #888;
 }
