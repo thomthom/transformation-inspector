@@ -1,0 +1,9 @@
+// https://code.visualstudio.com/docs/nodejs/working-with-javascript#__javascript-projects-jsconfigjson
+{
+  "compilerOptions": {
+    "target": "es2017"
+  },
+  "typeAcquisition": {
+    // "include": ["vue@next"]
+  }
+}
