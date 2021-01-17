@@ -1,3 +1,4 @@
+require 'tt_transformation/nodes/draw_points'
 require 'tt_transformation/nodes/node'
 require 'tt_transformation/nodes/points'
 require 'tt_transformation/nodes/transformation'

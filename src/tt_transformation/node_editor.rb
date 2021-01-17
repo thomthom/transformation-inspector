@@ -24,6 +24,8 @@ class NodeEditor
 
   private
 
+  NAMESPACE = TT::Plugins::TransformationInspector
+
   def updating?
     @updating
   end
@@ -86,6 +88,7 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   def ready(dialog)
     puts "Ready"
+    update_node_types(dialog)
     update(dialog)
   end
 
@@ -95,6 +98,19 @@ class NodeEditor
     @updating = true
     dialog.execute_script("updateNodes(#{nodes_json})")
     @updating = false
+  end
+
+  def update_node_types(dialog)
+    names = NAMESPACE.constants.grep(/\w+Node$/)
+    klasses = names.map { |name| NAMESPACE.const_get(name) }
+    # labels = klasses.map { |klass| class.name[0,-4] }
+    types = []
+    klasses.each { |klass|
+      types << { id: klass.typename, label: klass.typename[0...-4] }
+    }
+    types.sort! { |a, b| a[:label] <=> b[:label] }
+    types_json = JSON.pretty_generate(types)
+    dialog.execute_script("updateNodeTypes(#{types_json})")
   end
 
   # @param [UI::HtmlDialog] dialog
@@ -154,7 +170,7 @@ class NodeEditor
   def new_node(dialog, node_type)
     # TODO: move nodes to Nodes namespace
     # node_class = Nodes.const_get(node_type)
-    node_class = TT::Plugins::TransformationInspector.const_get(node_type)
+    node_class = NAMESPACE.const_get(node_type)
     node = node_class.new
     @nodes << node
     update(dialog)

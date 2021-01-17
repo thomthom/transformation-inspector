@@ -953,6 +953,34 @@ app.component('PointsNode', {
   `
 });
 
+app.component('DrawPointsNode', {
+  props: ['config'],
+  computed: {
+    color() {
+      // TODO: Return Color type with named accessors?
+      return this.config.color;
+    },
+    formattedColor() {
+      return `${this.color[0]}, ${this.color[1]}, ${this.color[2]}, ${this.color[3]}`;
+    },
+    cssColor() {
+      return `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+    },
+  },
+  template: `
+  <div>
+    <div>Mode: {{ config.mode }}</div>
+    <div>
+      Color:
+      <span class="node-color" :style="{ background: cssColor }"></span>
+      {{ formattedColor }}
+    </div>
+    <div>Line Width: {{ config.line_width }}</div>
+    <div>Line Stipple: {{ config.stipple }}</div>
+  </div>
+  `
+});
+
 app.component('toolbar-button-dropdown', {
   props: ['items'],
   emits: ['select'],
@@ -1008,4 +1036,9 @@ function updateNodes(nodes) {
     // vm.drawTool();
     vm.updating = false;
   });
+}
+
+function updateNodeTypes(nodeTypes) {
+  console.log('updateNodeTypes', nodeTypes);
+  vm.nodeTypes = nodeTypes;
 }
