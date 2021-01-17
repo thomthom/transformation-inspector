@@ -107,6 +107,13 @@ var UI = function() {
         cache_changed();
         update_sketchup_matrix();
       });
+
+      $('#toggleMore').click( function() {
+        $('.more').toggleClass('expand');
+        var text = $('.more').hasClass('expand') ? 'Less' : 'More';
+        $(this).text(text);
+        window.location = 'skp:toggle_more';
+      });
     },
 
     init_matrices : function() {

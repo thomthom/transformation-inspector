@@ -155,3 +155,16 @@ td.translation {
   content: '°';
   display: 'inline';
 }
+
+button#toggleMore {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 0.5em;
+}
+
+.more {
+  display: none;
+}
+.more.expand {
+  display: block;
+}

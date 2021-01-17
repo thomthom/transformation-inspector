@@ -9,10 +9,13 @@ module TT::Plugins::TransformationInspector
     file_loaded( __FILE__ )
   end
 
+  MATRIX_WIDTH = 400
+  MATRIX_COLLAPSED_HEIGHT = 470
+  MATRIX_EXPANDED_HEIGHT = 1000
 
   def self.inspect_transformation
-    width  = 400
-    height = 970
+    width  = MATRIX_WIDTH
+    height = MATRIX_COLLAPSED_HEIGHT
 
     options = {
       :dialog_title => 'Transformation Matrix',
@@ -25,6 +28,7 @@ module TT::Plugins::TransformationInspector
       :height       => height
     }
 
+    @collapsed = true
     @window = self.create_window( options )
 
     # Display the window on top of SketchUp's window.
@@ -78,6 +82,13 @@ module TT::Plugins::TransformationInspector
       #puts "Window_Ready()"
       self.selection_changed( Sketchup.active_model.selection )
       self.observe_models
+    }
+
+    window.add_action_callback('toggle_more') { |dialog, params|
+      # puts "toggle_more"
+      @collapsed = !@collapsed
+      height = @collapsed ? MATRIX_COLLAPSED_HEIGHT : MATRIX_EXPANDED_HEIGHT
+      dialog.set_size(MATRIX_WIDTH, height)
     }
 
     window.set_on_close {
@@ -192,6 +203,9 @@ module TT::Plugins::TransformationInspector
   def self.reload
     original_verbose = $VERBOSE
     $VERBOSE = nil
+    @window&.close
+    @window = nil
+    # rubocop:disable SketchupSuggestions/FileEncoding
     load __FILE__
     if defined?( PATH ) && File.exist?( PATH )
       x = Dir.glob( File.join(PATH, '*.rb') ).each { |file|
