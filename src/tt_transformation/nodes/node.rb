@@ -184,8 +184,13 @@ module TT::Plugins::TransformationInspector
 
       # @private
       def invalidate_cache
+        puts "invalidate_cache #{self}"
         # TODO: Use events to invalidate the output.
         @data = nil
+        @partners.each { |partner|
+          partner.node.send(:invalidate_cache) # KLUDGE: Use notifications
+        }
+        nil
       end
 
     end
@@ -333,10 +338,13 @@ module TT::Plugins::TransformationInspector
     end
 
     def invalidate_cache
+      puts "invalidate_cache #{self}"
       @output.each { |channel_id, output_point|
+        puts "> output (#{channel_id}): #{output_point}"
         output_point.invalidate_cache
       }
       # trigger_event(:update, self)
+      Sketchup.active_model.active_view.invalidate
       nil
     end
 

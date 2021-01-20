@@ -1,6 +1,8 @@
 module TT::Plugins::TransformationInspector
 class NodeEditor
 
+  attr_reader :nodes
+
   def initialize
     # @type [Array<Node>]
     @nodes = []
@@ -68,8 +70,17 @@ class NodeEditor
     dialog.add_action_callback('sync_transformation') do |ctx, node_id, transformation|
       sync_transformation(dialog, node_id, transformation)
     end
+    dialog.add_action_callback('sync_draw_mode') do |ctx, node_id, mode|
+      sync_draw_mode(dialog, node_id, mode)
+    end
+    dialog.add_action_callback('sync_line_stipple') do |ctx, node_id, stipple|
+      sync_line_stipple(dialog, node_id, stipple)
+    end
     dialog.add_action_callback('new_node') do |ctx, node_type|
       new_node(dialog, node_type)
+    end
+    dialog.set_on_closed do
+      deactivate_canvas
     end
   end
 
@@ -80,8 +91,22 @@ class NodeEditor
       @dialog.bring_to_front
     else
       add_callbacks(@dialog)
+      activate_canvas
       @dialog.show
     end
+    nil
+  end
+
+  def activate_canvas
+    model = Sketchup.active_model
+    canvas = Canvas.new(self)
+    model.select_tool(canvas)
+    nil
+  end
+
+  def deactivate_canvas
+    model = Sketchup.active_model
+    model.select_tool(nil)
     nil
   end
 
@@ -132,6 +157,25 @@ class NodeEditor
     tr = Geom::Transformation.new(transformation)
     node.set_config(:transformation, tr)
     # TODO: trigger output update
+    Sketchup.active_model.active_view.invalidate
+  end
+
+  def sync_draw_mode(dialog, node_id, mode)
+    return if updating?
+    puts "sync_draw_mode #{node_id}: #{mode.inspect}"
+    # @type [DrawPointsNode]
+    node = object_from_id(DrawPointsNode, node_id)
+    node.set_config(:mode, mode)
+    Sketchup.active_model.active_view.invalidate
+  end
+
+  def sync_line_stipple(dialog, node_id, stipple)
+    return if updating?
+    puts "sync_line_stipple #{node_id}: #{stipple.inspect}"
+    # @type [DrawPointsNode]
+    node = object_from_id(DrawPointsNode, node_id)
+    node.set_config(:stipple, stipple)
+    Sketchup.active_model.active_view.invalidate
   end
 
   # @param [UI::HtmlDialog] dialog
@@ -197,6 +241,7 @@ class NodeEditor
       Geom::Point3d.new(0, 9, 0),
     ]
     points_node = PointsNode.new(points: points)
+    points_node.position = Geom::Point2d.new(100, 0)
 
     tr1 = Geom::Transformation.scaling(1,2,3)
     tr_node1 = TransformationNode.new(transformation: tr1)
@@ -212,7 +257,50 @@ class NodeEditor
     tr_node3 = TransformationNode.new(transformation: tr3)
     tr_node3.position = Geom::Point2d.new(300, 300)
 
-    [points_node, tr_node1, tr_node2, tr_node3]
+    draw_node = DrawPointsNode.new
+    draw_node.position = Geom::Point2d.new(850, 0)
+    draw_node.input(:geom).connect_to(tr_node2.output(:geom))
+
+    [points_node, tr_node1, tr_node2, tr_node3, draw_node]
+  end
+
+
+  class Canvas
+
+    # @param [NodeEditor] editor
+    def initialize(editor)
+      @editor = editor
+    end
+
+    def activate
+      view = Sketchup.active_model.active_view
+      view.invalidate
+    end
+
+    # @param [Sketchup::View] view
+    def deactivate(view)
+      view.invalidate
+    end
+
+    # @param [Sketchup::View] view
+    def suspend(view)
+      view.invalidate
+    end
+
+    # @param [Sketchup::View] view
+    def resume(view)
+      view.invalidate
+    end
+
+    # @param [Sketchup::View] view
+    def draw(view)
+      @editor.nodes.each { |node|
+        next unless node.respond_to?(:draw)
+
+        node.draw(view)
+      }
+    end
+
   end
 
 end # class

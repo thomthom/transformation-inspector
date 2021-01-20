@@ -244,9 +244,39 @@ const testNodes = [
         1.0
       ]
     }
+  },
+  {
+    "id": 600,
+    "type": "DrawPointsNode",
+    "label": "Untitled",
+    "position": {
+      "x": 896.0,
+      "y": 88.0
+    },
+    "input": [
+      {
+        "id": 620,
+        "type": "InputConnectionPoint",
+        "channel_id": "geom",
+        "node": 600,
+        "partner": null
+      }
+    ],
+    "output": [
+
+    ],
+    "config": {
+      "mode": 2,
+      "color": [
+        255,
+        165,
+        0,
+        255
+      ],
+      "line_width": 2,
+      "stipple": ""
+    }
   }
-
-
 ];
 
 class Point2d {
@@ -309,6 +339,37 @@ if (!isSketchUp) {
   console.info('Not running in context of SketchUp; loading test data...');
   defaultNodes = testNodes;
 }
+
+const DrawModeNames = [
+  { value: 0, label: 'GL_POINTS' },
+  { value: 1, label: 'GL_LINES' },
+  { value: 2, label: 'GL_LINE_LOOP' },
+  { value: 3, label: 'GL_LINE_STRIP' },
+  { value: 4, label: 'GL_TRIANGLES' },
+  { value: 5, label: 'GL_TRIANGLE_STRIP' },
+  { value: 6, label: 'GL_TRIANGLE_FAN' },
+  { value: 7, label: 'GL_QUADS' },
+  { value: 8, label: 'GL_QUAD_STRIP' },
+  { value: 9, label: 'GL_POLYGON' },
+];
+
+const StippleNames = [
+  { value: '', label: 'Solid' },
+  { value: '.', label: 'Dotted' },
+  { value: '-', label: 'Short Dash' },
+  { value: '_', label: 'Long Dash' },
+  { value: '-.-', label: 'Dash Dot Dash' },
+];
+
+const PointStyleNames = [
+  { value: 1, label: 'Open Square' },
+  { value: 2, label: 'Filled Square' },
+  { value: 3, label: 'Plus' },
+  { value: 4, label: 'Cross' },
+  { value: 5, label: 'Star' },
+  { value: 6, label: 'Open Triangle' },
+  { value: 7, label: 'Filled Triangle' },
+];
 
 // The Application
 const NodeEditor = {
@@ -411,6 +472,24 @@ const NodeEditor = {
         console.log('sketchup.sync_transformation', nodeId);
         const values = Object.values(transformation);
         sketchup.sync_transformation(nodeId, values);
+      }
+    },
+    sync_draw_mode: function(nodeId, mode) {
+      // console.log('sketchup.sync_draw_mode', nodeId, mode);
+      // console.log('arguments', arguments);
+      if (this.updating) return;
+      if (isSketchUp) {
+        console.log('sketchup.sync_draw_mode', nodeId, mode);
+        sketchup.sync_draw_mode(nodeId, mode);
+      }
+    },
+    sync_line_stipple: function(nodeId, stipple) {
+      // console.log('sketchup.sync_line_stipple', nodeId, stipple);
+      // console.log('arguments', arguments);
+      if (this.updating) return;
+      if (isSketchUp) {
+        console.log('sketchup.sync_line_stipple', nodeId, stipple);
+        sketchup.sync_line_stipple(nodeId, stipple);
       }
     },
     /**
@@ -954,7 +1033,13 @@ app.component('PointsNode', {
 });
 
 app.component('DrawPointsNode', {
-  props: ['config'],
+  props: ['node', 'config'],
+  data() {
+    return {
+      drawModeOptions: DrawModeNames,
+      stippleOptions: StippleNames,
+    }
+  },
   computed: {
     color() {
       // TODO: Return Color type with named accessors?
@@ -967,16 +1052,36 @@ app.component('DrawPointsNode', {
       return `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
     },
   },
+  methods: {
+    onDrawModeChange() {
+      this.$emit('sync_draw_mode', this.node, this.config.mode);
+    },
+    onLineStippleChange() {
+      this.$emit('sync_line_stipple', this.node, this.config.stipple);
+    },
+  },
   template: `
   <div>
-    <div>Mode: {{ config.mode }}</div>
+    <div>Mode:
+      <select v-model="config.mode" @change="onDrawModeChange">
+        <option v-for="option in drawModeOptions" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
     <div>
       Color:
       <span class="node-color" :style="{ background: cssColor }"></span>
       {{ formattedColor }}
     </div>
     <div>Line Width: {{ config.line_width }}</div>
-    <div>Line Stipple: {{ config.stipple }}</div>
+    <div>Line Stipple:
+      <select v-model="config.stipple" @change="onLineStippleChange">
+        <option v-for="option in stippleOptions" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
   </div>
   `
 });

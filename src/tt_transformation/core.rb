@@ -42,9 +42,15 @@ module TT::Plugins::TransformationInspector
   MATRIX_COLLAPSED_HEIGHT = 470
   MATRIX_EXPANDED_HEIGHT = 1000
 
+  # TT::Plugins::TransformationInspector.node_editor
   def self.node_editor
+    @node_editor
+  end
+
+  def self.show_node_editor
     @node_editor ||= NodeEditor.new
     @node_editor.show
+    nil
   end
 
 
