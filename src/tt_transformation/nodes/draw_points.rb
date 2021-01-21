@@ -26,7 +26,11 @@ module TT::Plugins::TransformationInspector
       view.drawing_color = config(:color)
       view.line_width = config(:line_width)
       view.line_stipple = config(:stipple)
-      view.draw(config(:mode), input(:geom).data)
+      begin
+        view.draw(config(:mode), input(:geom).data)
+      rescue => error
+        puts error.message
+      end
     rescue MissingInput
       # TODO: Indicate missing input in the UI.
     end
