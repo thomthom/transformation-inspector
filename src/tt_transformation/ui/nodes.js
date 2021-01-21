@@ -1119,7 +1119,7 @@ app.component('DrawPointsNode', {
   template: `
   <div class="node-config-color">
     <div class="node-inline-input">Mode:
-      <select v-model.number="config.mode" @input="onDrawModeChange">
+      <select v-model.number="config.mode" @change="onDrawModeChange">
         <option v-for="option in drawModeOptions" :value="option.value">
           {{ option.label }}
         </option>
@@ -1144,7 +1144,7 @@ app.component('DrawPointsNode', {
       <input type="number" v-model.number="config.line_width" @input="onLineWidthChange" min="0" max="20">
     </div>
     <div class="node-inline-input">Line Stipple:
-      <select v-model="config.stipple" @input="onLineStippleChange">
+      <select v-model="config.stipple" @change="onLineStippleChange">
         <option v-for="option in stippleOptions" :value="option.value">
           {{ option.label }}
         </option>
