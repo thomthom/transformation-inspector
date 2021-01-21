@@ -474,22 +474,16 @@ const NodeEditor = {
         sketchup.sync_transformation(nodeId, values);
       }
     },
-    sync_draw_mode: function(nodeId, mode) {
-      // console.log('sketchup.sync_draw_mode', nodeId, mode);
+    sync_draw_config: function(nodeId, key, value) {
+      // console.log('sketchup.sync_draw_config', nodeId, key, value);
       // console.log('arguments', arguments);
       if (this.updating) return;
       if (isSketchUp) {
-        console.log('sketchup.sync_draw_mode', nodeId, mode);
-        sketchup.sync_draw_mode(nodeId, mode);
-      }
-    },
-    sync_line_stipple: function(nodeId, stipple) {
-      // console.log('sketchup.sync_line_stipple', nodeId, stipple);
-      // console.log('arguments', arguments);
-      if (this.updating) return;
-      if (isSketchUp) {
-        console.log('sketchup.sync_line_stipple', nodeId, stipple);
-        sketchup.sync_line_stipple(nodeId, stipple);
+        if (key == 'color') {
+          value = Object.values(value);
+        }
+        console.log('sketchup.sync_draw_config', nodeId, key, value);
+        sketchup.sync_draw_config(nodeId, key, value);
       }
     },
     /**
@@ -1032,12 +1026,16 @@ app.component('PointsNode', {
   `
 });
 
+// CEF used by SketchUp doesn't fully support color input type.
+const supportColorPicker = !isSketchUp;
+
 app.component('DrawPointsNode', {
   props: ['node', 'config'],
   data() {
     return {
       drawModeOptions: DrawModeNames,
       stippleOptions: StippleNames,
+      useColorPicker: supportColorPicker,
     }
   },
   computed: {
@@ -1045,38 +1043,103 @@ app.component('DrawPointsNode', {
       // TODO: Return Color type with named accessors?
       return this.config.color;
     },
+    alpha: {
+      get() {
+        return this.color[3];
+      },
+      set(newValue) {
+        this.color[3] = newValue;
+      },
+    },
     formattedColor() {
       return `${this.color[0]}, ${this.color[1]}, ${this.color[2]}, ${this.color[3]}`;
     },
     cssColor() {
       return `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
     },
+    hexColor: {
+      get() {
+        return this.rgbToHex(this.color[0], this.color[1], this.color[2]);
+      },
+      set(newValue) {
+        const color = this.hexToRgb(newValue);
+        const rgba = [
+          color.r,
+          color.g,
+          color.b,
+          this.alpha,
+        ];
+        this.config.color = rgba;
+      }
+    }
   },
   methods: {
     onDrawModeChange() {
-      this.$emit('sync_draw_mode', this.node, this.config.mode);
+      this.syncConfig('mode');
     },
     onLineStippleChange() {
-      this.$emit('sync_line_stipple', this.node, this.config.stipple);
+      this.syncConfig('stipple');
+    },
+    onColorChange() {
+      this.syncConfig('color');
+    },
+    onLineWidthChange() {
+      this.syncConfig('line_width');
+    },
+    syncConfig(key) {
+      this.$emit('sync_draw_config', this.node, key, this.config[key]);
+    },
+    byteToHex(c) {
+      var hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    },
+    rgbToHex(r, g, b) {
+      return "#" + this.byteToHex(r) + this.byteToHex(g) + this.byteToHex(b);
+    },
+    hexToRgb(hex) {
+      // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+      const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+      });
+
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
     },
   },
   template: `
-  <div>
-    <div>Mode:
-      <select v-model="config.mode" @change="onDrawModeChange">
+  <div class="node-config-color">
+    <div class="node-inline-input">Mode:
+      <select v-model.number="config.mode" @input="onDrawModeChange">
         <option v-for="option in drawModeOptions" :value="option.value">
           {{ option.label }}
         </option>
       </select>
     </div>
-    <div>
+    <div class="node-color">
       Color:
-      <span class="node-color" :style="{ background: cssColor }"></span>
+      <span class="node-color-swatch" :style="{ background: cssColor }"></span>
       {{ formattedColor }}
+      <div class="node-color-picker" v-if="useColorPicker">
+        <input type="color" v-model="hexColor" @input="onColorChange">
+        <input type="number" v-model.number="alpha" @input="onColorChange" min="0" max="255">
+      </div>
+      <div class="node-color-input" v-else>
+        <input type="number" v-model.number="color[0]" @input="onColorChange" min="0" max="255">
+        <input type="number" v-model.number="color[1]" @input="onColorChange" min="0" max="255">
+        <input type="number" v-model.number="color[2]" @input="onColorChange" min="0" max="255">
+        <input type="number" v-model.number="color[3]" @input="onColorChange" min="0" max="255">
+      </div>
     </div>
-    <div>Line Width: {{ config.line_width }}</div>
-    <div>Line Stipple:
-      <select v-model="config.stipple" @change="onLineStippleChange">
+    <div class="node-inline-input">Line Width:
+      <input type="number" v-model.number="config.line_width" @input="onLineWidthChange" min="0" max="20">
+    </div>
+    <div class="node-inline-input">Line Stipple:
+      <select v-model="config.stipple" @input="onLineStippleChange">
         <option v-for="option in stippleOptions" :value="option.value">
           {{ option.label }}
         </option>

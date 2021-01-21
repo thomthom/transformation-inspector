@@ -70,11 +70,8 @@ class NodeEditor
     dialog.add_action_callback('sync_transformation') do |ctx, node_id, transformation|
       sync_transformation(dialog, node_id, transformation)
     end
-    dialog.add_action_callback('sync_draw_mode') do |ctx, node_id, mode|
-      sync_draw_mode(dialog, node_id, mode)
-    end
-    dialog.add_action_callback('sync_line_stipple') do |ctx, node_id, stipple|
-      sync_line_stipple(dialog, node_id, stipple)
+    dialog.add_action_callback('sync_draw_config') do |ctx, node_id, key, value|
+      sync_draw_config(dialog, node_id, key.to_sym, value)
     end
     dialog.add_action_callback('new_node') do |ctx, node_type|
       new_node(dialog, node_type)
@@ -160,21 +157,16 @@ class NodeEditor
     Sketchup.active_model.active_view.invalidate
   end
 
-  def sync_draw_mode(dialog, node_id, mode)
+  # @param [UI::HtmlDialog] dialog
+  # @param [Integer] node_id
+  # @param [Symbol] key
+  # @param [Object] value
+  def sync_draw_config(dialog, node_id, key, value)
     return if updating?
-    puts "sync_draw_mode #{node_id}: #{mode.inspect}"
+    puts "sync_draw_config(#{key}, node: #{node_id}, value: #{value.inspect})"
     # @type [DrawPointsNode]
     node = object_from_id(DrawPointsNode, node_id)
-    node.set_config(:mode, mode)
-    Sketchup.active_model.active_view.invalidate
-  end
-
-  def sync_line_stipple(dialog, node_id, stipple)
-    return if updating?
-    puts "sync_line_stipple #{node_id}: #{stipple.inspect}"
-    # @type [DrawPointsNode]
-    node = object_from_id(DrawPointsNode, node_id)
-    node.set_config(:stipple, stipple)
+    node.set_config(key, value)
     Sketchup.active_model.active_view.invalidate
   end
 

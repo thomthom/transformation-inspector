@@ -20,7 +20,17 @@ body {
 input, select, textarea {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 10pt;
+  min-width: 3em;
+  border: none;
 }
+input {
+  padding: 2px 3px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 
 * {
   cursor: inherit;
@@ -127,9 +137,6 @@ be of much use anyway.
   display: inline-block;
   color: #000;
   background: #ccc;
-  border: none;
-  padding: 2px 3px;
-  box-sizing: border-box;
   width: 100%;
 }
 /* .node-matrix-4x4 tbody td:nth-of-type(2) input {
@@ -196,10 +203,39 @@ be of much use anyway.
   background: rgba(255, 255, 255, 0.1);
 }
 
-.node-color {
+.node-color-swatch {
   display: inline-block;
   vertical-align: bottom;
   width: 10px;
   height: 10px;
   border: 1px solid #111;
+}
+
+.node-color input {
+  display: inline-block;
+  width: 100%;
+}
+.node-color-picker {
+  display: grid;
+  grid-template-columns: 1fr 3.5em;
+}
+
+.node-color-input {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.node-config-color > div {
+  margin-bottom: 0.4em;
+}
+
+.node-inline-input {
+  display: flex;
+  white-space: nowrap;
+}
+
+.node-inline-input input,
+.node-inline-input select {
+  flex-grow: 1;
+  margin-left: 0.25em;
 }
