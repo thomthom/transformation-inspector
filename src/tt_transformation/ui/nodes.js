@@ -470,8 +470,7 @@ const NodeEditor = {
       if (this.updating) return;
       if (isSketchUp) {
         console.log('sketchup.sync_transformation', nodeId);
-        const values = Object.values(transformation);
-        sketchup.sync_transformation(nodeId, values);
+        sketchup.sync_transformation(nodeId, transformation);
       }
     },
     sync_draw_config: function(nodeId, key, value) {
@@ -479,9 +478,6 @@ const NodeEditor = {
       // console.log('arguments', arguments);
       if (this.updating) return;
       if (isSketchUp) {
-        if (key == 'color') {
-          value = Object.values(value);
-        }
         console.log('sketchup.sync_draw_config', nodeId, key, value);
         sketchup.sync_draw_config(nodeId, key, value);
       }
@@ -967,7 +963,8 @@ app.component('TransformationNode', {
     matrix: {
       deep: true,
       handler(newMatrix) {
-        this.$emit('sync_transformation', this.node, newMatrix);
+        const value = Object.values(newMatrix);
+        this.$emit('sync_transformation', this.node, value);
       }
     }
   },
@@ -1087,7 +1084,15 @@ app.component('DrawPointsNode', {
       this.syncConfig('line_width');
     },
     syncConfig(key) {
-      this.$emit('sync_draw_config', this.node, key, this.config[key]);
+      let value = this.config[key];
+      if (key == 'color') {
+        value = Object.values(value);
+        value[0] = parseInt(value[0]) || 0;
+        value[1] = parseInt(value[1]) || 0;
+        value[2] = parseInt(value[2]) || 0;
+        value[3] = parseInt(value[3]) || 0;
+      }
+      this.$emit('sync_draw_config', this.node, key, value);
     },
     byteToHex(c) {
       var hex = c.toString(16);
