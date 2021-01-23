@@ -15,6 +15,9 @@
     <toolbar-button-dropdown :items="nodeTypes" @select="newNode">
       New Node...
     </toolbar-button-dropdown>
+    <toolbar-button @click="saveSession">Save</toolbar-button>
+    <toolbar-button @click="loadSession">Load</toolbar-button>
+    <toolbar-button @click="resetSession">Reset</toolbar-button>
   </section>
 
   <section class="node-board">

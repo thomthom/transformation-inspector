@@ -408,6 +408,15 @@ const NodeEditor = {
         console.info('TODO: new node:', item.id);
       }
     },
+    saveSession: function() {
+      console.log('Save session');
+    },
+    loadSession: function() {
+      console.log('Load session');
+    },
+    resetSession: function() {
+      console.log('Reset session');
+    },
     /**
      * @param {number} inputId Connector id
      * @param {number} outputId Connector id
@@ -1189,6 +1198,14 @@ app.component('toolbar-button-dropdown', {
     <div v-show="menu" class="node-toolbar-dropdown">
       <div v-for="item in items" :key="item.id" @click="select(item)">{{ item.label }}</div>
     </div>
+  </div>
+  `
+});
+
+app.component('toolbar-button', {
+  template: `
+  <div class="node-toolbar-item">
+    <button><slot></slot></button>
   </div>
   `
 });

@@ -187,6 +187,9 @@ be of much use anyway.
   background: #333;
   border: none;
 }
+.node-toolbar button:hover {
+  background: #444;
+}
 .node-toolbar-item {
   display: inline-block;
 }
