@@ -6,13 +6,27 @@ module TT::Plugins::TransformationInspector
 
     include ViewConstants
 
-    def initialize
+    # @param [Hash] data
+    # @return [PointsNode]
+    def self.deserialize(data)
+      options = {
+        mode: data[:config][:mode],
+        color: Sketchup::Color.new(*data[:config][:color]),
+        line_width: data[:config][:line_width],
+        stipple: data[:config][:stipple],
+      }
+      node = self.new(options)
+      node
+    end
+
+    # @param [Hash] options
+    def initialize(options = {})
       super()
-      # TODO:
       @config[:mode] = GL_LINE_LOOP
       @config[:color] = Sketchup::Color.new('orange').to_a
       @config[:line_width] = 2
       @config[:stipple] = STIPPLE_SOLID
+      @config.merge!(options)
     end
 
     # @in [Enumerable<#transform>]
@@ -46,11 +60,12 @@ module TT::Plugins::TransformationInspector
     end
 
     def config_to_hash
-      # {
-      #   points: config(:points).map { |pt| pt.to_a.map(&:to_f) }
-      # }
-      # TODO:
-      @config
+      {
+        mode: config(:mode),
+        color: config(:color).to_a,
+        line_width: config(:line_width),
+        stipple: config(:stipple),
+      }
     end
 
   end # class Node

@@ -11,13 +11,13 @@ module TT::Plugins::TransformationInspector
     class RecursiveAccess < Error; end
     class RecursiveConnection < Error; end
 
-    # @return [Hash{Symbol, InputChannel}]
+    # @return [Hash{Symbol => InputChannel}]
     def self.input_channels
       @input_channels ||= {}
       @input_channels
     end
 
-    # @return [Hash{Symbol, OutputChannel}]
+    # @return [Hash{Symbol => OutputChannel}]
     def self.output_channels
       @output_channels ||= {}
       @output_channels
@@ -219,11 +219,19 @@ module TT::Plugins::TransformationInspector
       }
     end
 
+    # @param [String] value
+    def label=(value)
+      raise TypeError unless value.is_a?(String)
+      @label = value
+      # TODO: Update HtmlDialog
+    end
+
 
     # @param [Geom::Point2d] point
     def position=(point)
       raise TypeError unless point.is_a?(Geom::Point2d)
       @position = point
+      # TODO: Update HtmlDialog
     end
 
 
@@ -279,6 +287,7 @@ module TT::Plugins::TransformationInspector
       raise TypeError, "got #{input.class}" unless input.is_a?(InputConnectionPoint)
       raise TypeError, "got #{output.class}" unless output.is_a?(OutputConnectionPoint)
       raise RecursiveConnection, "cannot connect to itself" if input.node == output.node
+      raise ArgumentError, "input must belong to the receiver" unless input.node == self
       if input.partner
         input.partner.partners.delete(self)
       end

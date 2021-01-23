@@ -3,6 +3,16 @@ require 'tt_transformation/nodes/node'
 module TT::Plugins::TransformationInspector
   class PointsNode < Node
 
+    # @param [Hash] data
+    # @return [PointsNode]
+    def self.deserialize(data)
+      points = data[:config][:points].map { |point_data|
+        Geom::Point3d.new(*point_data)
+      }
+      node = self.new(points: points)
+      node
+    end
+
     # @param [Array<Geom::Point3d>] points
     def initialize(points: [])
       raise TypeError unless points.is_a?(Array)

@@ -3,6 +3,15 @@ require 'tt_transformation/nodes/node'
 module TT::Plugins::TransformationInspector
   class TransformationNode < Node
 
+    # @param [Hash] data
+    # @return [PointsNode]
+    def self.deserialize(data)
+      transformation = Geom::Transformation.new
+      transformation.set!(data[:config][:transformation])
+      node = self.new(transformation: transformation)
+      node
+    end
+
     # @param [Geom::Transformation] transformation
     def initialize(transformation: IDENTITY)
       raise TypeError unless transformation.is_a?(Geom::Transformation)

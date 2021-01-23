@@ -1,3 +1,6 @@
+require 'fileutils'
+require 'json'
+
 module TT::Plugins::TransformationInspector
 class NodeEditor
 
@@ -11,17 +14,15 @@ class NodeEditor
     @dialog = nil
 
     @updating = false
-
-    # DEBUG
-    @nodes = create_dummy_nodes
   end
 
   def show
+    restore_session
     show_node_editor
   end
 
   def close
-    @dialog.close
+    @dialog&.close
   end
 
   private
@@ -77,7 +78,7 @@ class NodeEditor
       new_node(dialog, node_type)
     end
     dialog.set_on_closed do
-      deactivate_canvas
+      end_session
     end
   end
 
@@ -92,6 +93,58 @@ class NodeEditor
       @dialog.show
     end
     nil
+  end
+
+  def restore_session
+    return unless @nodes.empty?
+
+    if File.exists?(last_session_path)
+      puts "restoring session..."
+      begin
+        @nodes = read(last_session_path)
+        return
+      rescue => error
+        puts "> failed to restore session, falling back to default..."
+        @nodes = create_default_nodes
+        raise
+      end
+    end
+
+    puts "creating default nodes..."
+    @nodes = create_default_nodes
+    nil
+  end
+
+  def end_session
+    deactivate_canvas
+    unless File.directory?(app_data_path)
+      FileUtils.mkdir_p(app_data_path)
+    end
+    write(last_session_path, @nodes)
+    puts "saved session to #{last_session_path}"
+    nil
+  end
+
+  def clear_last_session
+    if File.exists?(last_session_path)
+      File.delete(last_session_path)
+    end
+    nil
+  end
+
+  # @return [String]
+  def app_data_path
+    if Sketchup.platform == :platform_win
+      app_path = File.expand_path(ENV['APPDATA'])
+      path = File.join(app_path, 'Transformation Inspector')
+    else
+      raise NotImplementedError, "Platform #{Sketchup.platform} not supported"
+    end
+  end
+
+  # @return [String]
+  def last_session_path
+    File.join(app_data_path, 'last_session.json')
   end
 
   def activate_canvas
@@ -225,7 +278,71 @@ class NodeEditor
     value
   end
 
-  def create_dummy_nodes
+  # @param [String] path
+  # @return [Array<Node>]
+  def read(path)
+    json = File.read(path, encoding: 'utf-8')
+    data = JSON.parse(json, symbolize_names: true)
+    deserialize_nodes(data)
+  end
+
+  # @param [String] path
+  # @param [Array<Node>] nodes
+  def write(path, nodes)
+    data = serialize_nodes(nodes)
+    json = JSON.pretty_generate(data)
+    File.write(path, json, encoding: 'utf-8')
+    nil
+  end
+
+  # @param [Array<Node>] nodes
+  # @return [Array<Hash>]
+  def serialize_nodes(nodes)
+    nodes.map(&:to_h)
+  end
+
+  Connection = Struct.new(:channel_id, :node)
+
+  # @param [Array<Hash>] data
+  # @return [Array<Node>]
+  def deserialize_nodes(nodes_data)
+    # @type [Hash{Integer => Node}] Node id to Node
+    nodes_map = {}
+    # @type [Hash{Integer => Connection}] Node id to Connection
+    connections_map = {}
+    # First recreate all the nodes without the connections.
+    nodes = nodes_data.map { |data|
+      type = data[:type].to_sym
+      klass = TT::Plugins::TransformationInspector.const_get(type)
+      node = klass.deserialize(data)
+      node.position = Geom::Point2d.new(*data[:position].values)
+      node.label = data[:label]
+
+      nodes_map[data[:id]] = node
+      data[:input].each { |connector_data|
+        id = connector_data[:id]
+        channel_id = connector_data[:channel_id].to_sym
+        connections_map[id] = Connection.new(channel_id, node)
+      }
+
+      node
+    }
+    # Connect the nodes.
+    nodes_data.each { |data|
+      node = nodes_map[data[:id]]
+      data[:output].each { |output_data|
+        output = node.output(output_data[:channel_id].to_sym)
+        output_data[:partners].each { |partner|
+          connection = connections_map[partner]
+          input = connection.node.input(connection.channel_id)
+          input.connect_to(output)
+        }
+      }
+    }
+    nodes
+  end
+
+  def create_default_nodes
     points = [
       Geom::Point3d.new(0, 0, 0),
       Geom::Point3d.new(9, 0, 0),
