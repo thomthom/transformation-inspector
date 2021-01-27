@@ -410,12 +410,21 @@ const NodeEditor = {
     },
     saveSession: function() {
       console.log('Save session');
+      if (isSketchUp) {
+        sketchup.save_session();
+      }
     },
     loadSession: function() {
       console.log('Load session');
+      if (isSketchUp) {
+        sketchup.load_session();
+      }
     },
     resetSession: function() {
       console.log('Reset session');
+      if (isSketchUp) {
+        sketchup.reset_session();
+      }
     },
     /**
      * @param {number} inputId Connector id

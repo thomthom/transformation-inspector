@@ -77,6 +77,15 @@ class NodeEditor
     dialog.add_action_callback('new_node') do |ctx, node_type|
       new_node(dialog, node_type)
     end
+    dialog.add_action_callback('save_session') do |ctx|
+      save_session(dialog)
+    end
+    dialog.add_action_callback('load_session') do |ctx|
+      load_session(dialog)
+    end
+    dialog.add_action_callback('reset_session') do |ctx|
+      reset_session(dialog)
+    end
     dialog.set_on_closed do
       end_session
     end
@@ -371,6 +380,36 @@ class NodeEditor
     draw_node.input(:geom).connect_to(tr_node2.output(:geom))
 
     [points_node, tr_node1, tr_node2, tr_node3, draw_node]
+  end
+
+  def save_session(dialog)
+    title = "Save Nodes"
+    filter = "Nodes Sessions|*.nodes.json"
+    response = UI.savepanel(title, nil, filter)
+    return if response.nil?
+
+    puts "Write to: #{response}"
+    write(response, @nodes)
+  end
+
+  def load_session(dialog)
+    title = "Save Nodes"
+    filter = "Nodes Sessions|*.nodes.json"
+    response = UI.openpanel(title, nil, filter)
+    return if response.nil?
+
+    puts "Read from: #{response}"
+    @nodes = read(response)
+    update(dialog)
+  end
+
+  def reset_session(dialog)
+    message = "Remove all nodes?"
+    response = UI.messagebox(message, MB_OKCANCEL)
+    return if response == IDCANCEL
+
+    @nodes.clear
+    update(dialog)
   end
 
 
