@@ -1,5 +1,7 @@
 require 'json'
 
+require 'tt_transformation/nodes/notification_manager'
+
 module TT::Plugins::TransformationInspector
   class Node
 
@@ -326,8 +328,8 @@ module TT::Plugins::TransformationInspector
       }
     end
 
-    def to_json
-      to_h.to_json
+    def to_json(*args)
+      to_h.to_json(*args)
     end
 
     def to_s
@@ -343,7 +345,7 @@ module TT::Plugins::TransformationInspector
     # @param [Symbol] event_id
     # @param [Node] node
     def trigger_event(event_id, node)
-      nil
+      NotificationManager.default.notify(event_id, node: node)
     end
 
     def invalidate_cache

@@ -1,6 +1,8 @@
 require 'fileutils'
 require 'json'
 
+require 'tt_transformation/nodes/notification_manager'
+
 module TT::Plugins::TransformationInspector
 class NodeEditor
 
@@ -25,6 +27,15 @@ class NodeEditor
     @dialog&.close
   end
 
+  def on_update_config(event_data)
+    puts "on_update_config(#{event_data})"
+    node = event_data[:node]
+    data = node.to_h
+    json = JSON.pretty_generate(data)
+    @dialog.execute_script("updateNodeConfig(#{json})")
+    nil
+  end
+
   private
 
   NAMESPACE = TT::Plugins::TransformationInspector
@@ -35,6 +46,7 @@ class NodeEditor
 
   # @return [UI::HtmlDialog]
   def create_node_editor
+    puts "create_node_editor"
     options = {
       dialog_title: "Transformation Node Editor",
       preferences_key: "#{EXTENSION[:product_id]}_node_editor",
@@ -51,6 +63,8 @@ class NodeEditor
     dialog = UI::HtmlDialog.new(options)
     path = File.join(PATH, 'ui', 'nodes.html')
     dialog.set_file(path)
+    NotificationManager.default.reset
+    NotificationManager.default.add_listener(self)
     dialog
   end
 

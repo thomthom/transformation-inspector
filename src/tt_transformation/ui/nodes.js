@@ -500,6 +500,12 @@ const NodeEditor = {
         sketchup.sync_draw_config(nodeId, key, value);
       }
     },
+    updateNodeConfig(nodeData) {
+      console.log('updateNodeConfig', nodeData, nodeData.id);
+      const node = this.getNodeById(nodeData.id);
+      console.log(node);
+      node.config = nodeData.config;
+    },
     /**
      * @param {string} id
      */
@@ -966,6 +972,62 @@ app.component('node-watcher', {
   `
 });
 
+app.component('ViewTransformationNode', {
+  // Trying to bind nodeId will end up passing `undefined` to the receive of
+  // the emitted event even though the handler can access the value correctly.
+  // Renaming it to simply `node` and it works just fine. (??)
+  props: ['node', 'config'],
+  computed: {
+    matrix() {
+      return this.config.transformation;
+    },
+  },
+  template: `
+  <div>
+    <table class="node-matrix-4x4">
+
+    <colgroup>
+      <col width="25%">
+      <col width="25%">
+      <col width="25%">
+      <col width="25%">
+    </colgroup>
+
+    <tbody>
+      <tr>
+        <td><input class="rotate scale x" title="sX" :value="matrix[0]" readonly="readonly" /></td>
+        <td><input class="rotate scale y" title="" :value="matrix[4]" readonly="readonly" /></td>
+        <td><input class="rotate scale z" title="" :value="matrix[8]" readonly="readonly" /></td>
+        <td><input class="translation x" title="Wx" :value="matrix[12]" readonly="readonly" /></td>
+      </tr>
+
+      <tr>
+        <td><input class="rotate scale x" title="" :value="matrix[1]" readonly="readonly" /></td>
+        <td><input class="rotate scale y" title="sY" :value="matrix[5]" readonly="readonly" /></td>
+        <td><input class="rotate scale z" title="" :value="matrix[9]" readonly="readonly" /></td>
+        <td><input class="translation y" title="Wy" :value="matrix[13]" readonly="readonly" /></td>
+      </tr>
+
+      <tr>
+        <td><input class="rotate scale x" title="" :value="matrix[2]" readonly="readonly" /></td>
+        <td><input class="rotate scale y" title="" :value="matrix[6]" readonly="readonly" /></td>
+        <td><input class="rotate scale z" title="sZ" :value="matrix[10]" readonly="readonly" /></td>
+        <td><input class="translation z" title="Wz" :value="matrix[14]" readonly="readonly" /></td>
+      </tr>
+
+      <tr>
+        <td><input class="unused" title="" :value="matrix[3]" readonly="readonly" /></td>
+        <td><input class="unused" title="" :value="matrix[7]" readonly="readonly" /></td>
+        <td><input class="unused" title="" :value="matrix[11]" readonly="readonly" /></td>
+        <td><input class="scalar" title="Wt" :value="matrix[15]" readonly="readonly" /></td>
+      </tr>
+    </tbody>
+
+    </table>
+  </div>
+  `
+});
+
 app.component('TransformationNode', {
   // Trying to bind nodeId will end up passing `undefined` to the receive of
   // the emitted event even though the handler can access the value correctly.
@@ -1240,4 +1302,9 @@ function updateNodes(nodes) {
 function updateNodeTypes(nodeTypes) {
   console.log('updateNodeTypes', nodeTypes);
   vm.nodeTypes = nodeTypes;
+}
+
+function updateNodeConfig(node) {
+  console.log('updateNodeConfig', node);
+  vm.updateNodeConfig(node);
 }

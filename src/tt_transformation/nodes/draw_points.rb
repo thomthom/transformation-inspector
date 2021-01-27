@@ -7,7 +7,7 @@ module TT::Plugins::TransformationInspector
     include ViewConstants
 
     # @param [Hash] data
-    # @return [PointsNode]
+    # @return [DrawPointsNode]
     def self.deserialize(data)
       options = {
         mode: data[:config][:mode],

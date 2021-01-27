@@ -4,7 +4,7 @@ module TT::Plugins::TransformationInspector
   class TransformationNode < Node
 
     # @param [Hash] data
-    # @return [PointsNode]
+    # @return [TransformationNode]
     def self.deserialize(data)
       transformation = Geom::Transformation.new
       transformation.set!(data[:config][:transformation])
