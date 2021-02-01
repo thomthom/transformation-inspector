@@ -17,9 +17,11 @@ module TT::Plugins::TransformationInspector
     menu = UI.menu('Plugins')
     menu.add_item(cmd_inspector)
 
-    toolbar = UI::Toolbar.new('Transformation Inspector')
-    toolbar.add_item(cmd_inspector)
-    toolbar.restore
+    if Sketchup.version.to_i >= 16
+      toolbar = UI::Toolbar.new('Transformation Inspector')
+      toolbar.add_item(cmd_inspector)
+      toolbar.restore
+    end
 
     file_loaded(__FILE__)
   end
