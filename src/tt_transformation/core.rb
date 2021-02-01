@@ -3,10 +3,25 @@ require 'tt_transformation/instance'
 
 module TT::Plugins::TransformationInspector
 
-  unless file_loaded?( __FILE__ )
-    menu = UI.menu( 'Plugins' )
-    menu.add_item( 'Transformation Inspector' ) { self.inspect_transformation }
-    file_loaded( __FILE__ )
+  unless file_loaded?(__FILE__)
+    images_path = File.join(PATH, 'images')
+    ext = Sketchup.platform == :platform_win ? 'svg' : 'pdf'
+
+    cmd = UI::Command.new('Transformation Inspector') do
+      self.inspect_transformation
+    end
+    cmd.large_icon = File.join(images_path, "inspector.#{ext}")
+    cmd.small_icon = cmd.large_icon
+    cmd_inspector = cmd
+
+    menu = UI.menu('Plugins')
+    menu.add_item(cmd_inspector)
+
+    toolbar = UI::Toolbar.new('Transformation Inspector')
+    toolbar.add_item(cmd_inspector)
+    toolbar.restore
+
+    file_loaded(__FILE__)
   end
 
   MATRIX_WIDTH = 400
