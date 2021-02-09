@@ -3,6 +3,12 @@ require 'json'
 
 require 'tt_transformation/nodes/notification_manager'
 
+require 'tt_transformation/nodes/draw_points'
+require 'tt_transformation/nodes/node'
+require 'tt_transformation/nodes/points'
+require 'tt_transformation/nodes/transformation'
+require 'tt_transformation/nodes/view_transformation'
+
 module TT::Plugins::TransformationInspector
 class NodeEditor
 

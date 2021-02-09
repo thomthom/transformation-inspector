@@ -1,7 +1,3 @@
-require 'tt_transformation/nodes/draw_points'
-require 'tt_transformation/nodes/node'
-require 'tt_transformation/nodes/points'
-require 'tt_transformation/nodes/transformation'
 
 require 'tt_transformation/nodes/example'
 require 'tt_transformation/node_editor'
