@@ -6,6 +6,7 @@ require 'tt_transformation/nodes/notification_manager'
 require 'tt_transformation/nodes/draw_points'
 require 'tt_transformation/nodes/node'
 require 'tt_transformation/nodes/points'
+require 'tt_transformation/nodes/transform'
 require 'tt_transformation/nodes/transformation'
 require 'tt_transformation/nodes/view_transformation'
 
@@ -134,8 +135,10 @@ class NodeEditor
         return
       rescue => error
         puts "> failed to restore session, falling back to default..."
-        @nodes = create_default_nodes
-        raise
+        # @nodes = create_default_nodes
+        # raise
+        p error
+        puts error.backtrace.join("\n")
       end
     end
 
@@ -379,27 +382,31 @@ class NodeEditor
       Geom::Point3d.new(0, 9, 0),
     ]
     points_node = PointsNode.new(points: points)
-    points_node.position = Geom::Point2d.new(100, 0)
+    points_node.position = Geom::Point2d.new(400, 10)
 
     tr1 = Geom::Transformation.scaling(1,2,3)
     tr_node1 = TransformationNode.new(transformation: tr1)
-    tr_node1.position = Geom::Point2d.new(300, 0)
-    tr_node1.input(:geom).connect_to(points_node.output(:geom))
+    tr_node1.position = Geom::Point2d.new(50, 200)
 
     tr2 = Geom::Transformation.new(ORIGIN, Y_AXIS)
     tr_node2 = TransformationNode.new(transformation: tr2)
-    tr_node2.position = Geom::Point2d.new(600, 0)
-    tr_node2.input(:geom).connect_to(tr_node1.output(:geom))
+    tr_node2.position = Geom::Point2d.new(300, 200)
+    tr_node2.input(:transformation).connect_to(tr_node1.output(:transformation))
+
+    transform1_node = TransformNode.new
+    transform1_node.position = Geom::Point2d.new(600, 130)
+    transform1_node.input(:geom).connect_to(points_node.output(:geom))
+    transform1_node.input(:transformation).connect_to(tr_node2.output(:transformation))
 
     tr3 = Geom::Transformation.new(Geom::Point3d.new(10, 20, 30))
     tr_node3 = TransformationNode.new(transformation: tr3)
     tr_node3.position = Geom::Point2d.new(300, 300)
 
     draw_node = DrawPointsNode.new
-    draw_node.position = Geom::Point2d.new(850, 0)
-    draw_node.input(:geom).connect_to(tr_node2.output(:geom))
+    draw_node.position = Geom::Point2d.new(850, 30)
+    draw_node.input(:geom).connect_to(transform1_node.output(:geom))
 
-    [points_node, tr_node1, tr_node2, tr_node3, draw_node]
+    [points_node, tr_node1, tr_node2, tr_node3, transform1_node, draw_node]
   end
 
   def save_session(dialog)

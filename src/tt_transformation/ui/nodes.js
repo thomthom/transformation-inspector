@@ -1094,6 +1094,14 @@ app.component('TransformationNode', {
   `
 });
 
+app.component('TransformNode', {
+  props: ['config'],
+  template: `
+  <div>
+  </div>
+  `
+});
+
 app.component('PointsNode', {
   props: ['config'],
   template: `

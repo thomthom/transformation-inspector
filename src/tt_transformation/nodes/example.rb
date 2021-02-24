@@ -1,4 +1,8 @@
+require 'tt_transformation/nodes/draw_points'
 require 'tt_transformation/nodes/node'
+require 'tt_transformation/nodes/points'
+require 'tt_transformation/nodes/transformation'
+require 'tt_transformation/nodes/view_transformation'
 
 # TT::Plugins::TransformationInspector.example
 module TT::Plugins::TransformationInspector
@@ -44,7 +48,10 @@ module TT::Plugins::TransformationInspector
 
     tr1 = Geom::Transformation.scaling(1,2,3)
     tr_node1 = TransformationNode.new(transformation: tr1)
-    tr_node1.input(:geom).connect_to(points_node.output(:geom))
+
+    transform1 = TransformNode.new
+    transform1.input(:geom).connect_to(points_node.output(:geom))
+    transform1.input(:transformation).connect_to(tr_node1.output(:transformation))
 
     # puts '2-------------------'
 
