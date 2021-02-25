@@ -290,13 +290,13 @@ class Point2d {
    * @param {Point2d} point
    * @return {number} */
   distance(point) {
-    return Math.sqrt((point.x - this.x)**2 + (point.y - this.y)**2);
+    return Math.sqrt((point.x - this.x) ** 2 + (point.y - this.y) ** 2);
   }
   /**
    * @param {Point2d} point
    * @return {boolean} */
   within_distance(point, distance) {
-    return ((point.x - this.x)**2 + (point.y - this.y)**2) < distance**2;
+    return ((point.x - this.x) ** 2 + (point.y - this.y) ** 2) < distance ** 2;
   }
   /**
    * @return [Array]
@@ -332,6 +332,9 @@ class NodeSocket {
     this.editing = false;
   }
 };
+
+const chrome_version_match = navigator.userAgent.match(/Chrome\/(\d+)/);
+const chrome_version = (chrome_version_match) ? parseInt(chrome_version_match[1]) : 0;
 
 let defaultNodes = [];
 const isSketchUp = typeof sketchup !== 'undefined';
@@ -400,7 +403,7 @@ const NodeEditor = {
     }
   },
   methods: {
-    newNode: function(item) {
+    newNode: function (item) {
       if (isSketchUp) {
         console.log('sketchup.new_node', item.id);
         sketchup.new_node(item.id);
@@ -408,19 +411,19 @@ const NodeEditor = {
         console.info('TODO: new node:', item.id);
       }
     },
-    saveSession: function() {
+    saveSession: function () {
       console.log('Save session');
       if (isSketchUp) {
         sketchup.save_session();
       }
     },
-    loadSession: function() {
+    loadSession: function () {
       console.log('Load session');
       if (isSketchUp) {
         sketchup.load_session();
       }
     },
-    resetSession: function() {
+    resetSession: function () {
       console.log('Reset session');
       if (isSketchUp) {
         sketchup.reset_session();
@@ -430,7 +433,7 @@ const NodeEditor = {
      * @param {number} inputId Connector id
      * @param {number} outputId Connector id
      */
-    connect: function(inputId, outputId) {
+    connect: function (inputId, outputId) {
       if (isSketchUp) {
         console.log('sketchup.connect', inputId, outputId);
         sketchup.connect(inputId, outputId);
@@ -441,7 +444,7 @@ const NodeEditor = {
         // console.log('output', output);
         input.partner = output.id;
         output.partners.push(input.id);
-        this.$nextTick(function() { // TODO: do automatically.
+        this.$nextTick(function () { // TODO: do automatically.
           this.updateConnectors();
           this.drawNodeConnections();
         });
@@ -451,7 +454,7 @@ const NodeEditor = {
      * @param {number} inputId Connector id
      * @param {number} outputId Connector id
      */
-    disconnect: function(inputId, outputId) {
+    disconnect: function (inputId, outputId) {
       if (isSketchUp) {
         console.log('sketchup.disconnect', inputId, outputId);
         sketchup.disconnect(inputId, outputId);
@@ -469,20 +472,20 @@ const NodeEditor = {
         }
         // output.partners.delete(input.id);
 
-        this.$nextTick(function() { // TODO: do automatically.
+        this.$nextTick(function () { // TODO: do automatically.
           this.updateConnectors();
           this.drawNodeConnections();
         });
       }
     },
-    sync_position: function(node) {
+    sync_position: function (node) {
       if (this.updating) return;
       if (isSketchUp) {
         console.log('sketchup.sync_position', node.id, node.position);
         sketchup.sync_position(node.id, [node.position.x, node.position.y]);
       }
     },
-    sync_transformation: function(nodeId, transformation) {
+    sync_transformation: function (nodeId, transformation) {
       // console.log('sketchup.sync_transformation', nodeId);
       // console.log('arguments', arguments);
       if (this.updating) return;
@@ -491,7 +494,7 @@ const NodeEditor = {
         sketchup.sync_transformation(nodeId, transformation);
       }
     },
-    sync_draw_config: function(nodeId, key, value) {
+    sync_draw_config: function (nodeId, key, value) {
       // console.log('sketchup.sync_draw_config', nodeId, key, value);
       // console.log('arguments', arguments);
       if (this.updating) return;
@@ -509,17 +512,17 @@ const NodeEditor = {
     /**
      * @param {string} id
      */
-    getCanvasById: function(id) {
+    getCanvasById: function (id) {
       return /** @type{HTMLCanvasElement | null} */ (document.getElementById(id));
     },
     /** @return {HTMLCanvasElement | null} */
-    getNodeCanvas: function() {
+    getNodeCanvas: function () {
       return this.getCanvasById('canvasNodes');
     },
-    getToolCanvas: function() {
+    getToolCanvas: function () {
       return this.getCanvasById('canvasTools');
     },
-    resizeCanvas: function() {
+    resizeCanvas: function () {
       console.log('resizeCanvas');
       const nodeCanvas = this.getNodeCanvas();
       nodeCanvas.width = window.innerWidth;
@@ -532,7 +535,7 @@ const NodeEditor = {
       this.drawNodeConnections();
       this.drawTool();
     },
-    updateConnectors: function() {
+    updateConnectors: function () {
       const outputs = this.getConnectorElements(ConnectorType.Output);
       this.connectors.output = this.computeConnectorPoints(outputs, ConnectorType.Output);
 
@@ -599,7 +602,7 @@ const NodeEditor = {
     /**
      * @param {MouseEvent} event
      */
-    toolMouseDown: function(event) {
+    toolMouseDown: function (event) {
       // console.log('toolMouseDown', event.x, event.y);
       if (this.tool.pick) {
         event.preventDefault();
@@ -626,7 +629,7 @@ const NodeEditor = {
     /**
      * @param {MouseEvent} event
      */
-    toolMouseUp: function(event) {
+    toolMouseUp: function (event) {
       // console.log('toolMouseUp', event.x, event.y);
       if (this.tool.editing.input) {
         if (!this.tool.pick) {
@@ -658,13 +661,13 @@ const NodeEditor = {
     /**
      * @param {MouseEvent} event
      */
-    toolMouseMove: function(event) {
+    toolMouseMove: function (event) {
       // console.log('toolMouseMove', event.x, event.y);
       this.tool.cursor = new Point2d(event.x, event.y);
-      this.tool.pick = this.toolPickConnector(this.tool.cursor );
+      this.tool.pick = this.toolPickConnector(this.tool.cursor);
       this.drawTool();
     },
-    drawTool: function() {
+    drawTool: function () {
       const canvas = this.getToolCanvas();
       const ctx = canvas.getContext('2d');
 
@@ -730,13 +733,13 @@ const NodeEditor = {
         this.drawConnection(ctx, this.tool.startPick.position, point);
       }
     },
-    getSocketById: function(id) {
+    getSocketById: function (id) {
       return this.connectors.input.get(id) || this.connectors.output.get(id);
     },
     /**
      * @param {ConnectorType} type
      */
-    getConnectorElements: function(type) {
+    getConnectorElements: function (type) {
       const typeStr = (type == ConnectorType.Input) ? 'input' : 'output';
       const query = `.node > .${typeStr} > .connector`;
       /** @type {NodeListOf<HTMLElement>} */
@@ -748,7 +751,7 @@ const NodeEditor = {
      * @param {ConnectorType} type
      * @return {Map<number, NodeSocket>}
      */
-    computeConnectorPoints: function(elements, type) {
+    computeConnectorPoints: function (elements, type) {
       // TODO:
       // If you need the bounding rectangle relative to the top-left corner of
       // the document, just add the current scrolling position to the top and
@@ -781,7 +784,7 @@ const NodeEditor = {
       }
       return connections;
     },
-    drawNodeConnections: function() {
+    drawNodeConnections: function () {
       const canvas = this.getNodeCanvas();
       const ctx = canvas.getContext('2d');
 
@@ -826,7 +829,7 @@ const NodeEditor = {
      * @param {Point2d} [pt1]
      * @param {Point2d} [pt2]
      */
-    drawConnection: function(ctx, pt1, pt2, radius = 3, tension = 2) {
+    drawConnection: function (ctx, pt1, pt2, radius = 3, tension = 2) {
       const dx = Math.round((pt1.x - pt2.x) / tension);
 
       ctx.lineWidth = 2;
@@ -873,7 +876,7 @@ const NodeEditor = {
       }
     },
 
-    getConnectorById: function(id) {
+    getConnectorById: function (id) {
       let connector = undefined;
       for (const node of this.nodes) {
         connector = node.input.find(input => input.id == id);
@@ -884,15 +887,15 @@ const NodeEditor = {
       }
       return connector;
     },
-    getNodeById: function(id) {
+    getNodeById: function (id) {
       return this.nodes.find(node => node.id == id);
     },
 
-    onNodeMove: function(nodeId, x, y) {
+    onNodeMove: function (nodeId, x, y) {
       // console.log('onNodeMove', nodeId, x, y);
       // TODO: Debounce this call? In case multiple nodes are updated in bulk.
       // this.$nextTick(this.drawNodeConnections);
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         // console.log('nextTick');
         this.updateConnectors();
         this.drawNodeConnections();
@@ -900,7 +903,7 @@ const NodeEditor = {
       });
     },
 
-    nodeDragMouseDown: function(event) {
+    nodeDragMouseDown: function (event) {
       console.log('nodeDragMouseDown');
       event.preventDefault(); // Prevent native drag.
       document.addEventListener('mousemove', this.nodeDrag, { capture: true });
@@ -910,14 +913,14 @@ const NodeEditor = {
       const nodeId = parseInt(node_element.dataset.nodeId);
       this.drag.node = this.getNodeById(nodeId);
     },
-    nodeDrag: function(event) {
+    nodeDrag: function (event) {
       let node = this.drag.node;
       let x = (node.position.x + event.movementX);
       let y = (node.position.y + event.movementY);
       node.position.x = Math.max(0, x);
       node.position.y = Math.max(0, y);
     },
-    nodeEndDrag: function() {
+    nodeEndDrag: function () {
       console.log('nodeEndDrag');
       document.removeEventListener('mousemove', this.nodeDrag, { capture: true });
       // document.removeEventListener('mouseup ', this.nodeEndDrag, { capture: true });
@@ -1112,7 +1115,7 @@ app.component('PointsNode', {
 });
 
 // CEF used by SketchUp doesn't fully support color input type.
-const supportColorPicker = !isSketchUp;
+const supportColorPicker = !isSketchUp || (isSketchUp && chrome_version >= 88);
 
 app.component('DrawPointsNode', {
   props: ['node', 'config'],
@@ -1192,7 +1195,7 @@ app.component('DrawPointsNode', {
     hexToRgb(hex) {
       // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
       const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+      hex = hex.replace(shorthandRegex, function (m, r, g, b) {
         return r + r + g + g + b + b;
       });
 
@@ -1298,7 +1301,7 @@ function updateNodes(nodes) {
   // vm.updating = false;
   console.log('> updateNodes', nodes);
   // TODO: Do this automatically when nodes changes.
-  vm.$nextTick(function() {
+  vm.$nextTick(function () {
     // console.log('nextTick');
     vm.updateConnectors();
     vm.drawNodeConnections();
