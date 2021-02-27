@@ -32,6 +32,11 @@ module TT::Plugins::TransformationInspector
     # @in [Enumerable<#transform>]
     input :geom, "Geom"
 
+    # @out [Geom::Transformation]
+    output :geom, "Geom" do
+      input(:geom).data
+    end
+
     # @param [Sketchup::View] view
     def draw(view)
       puts "draw #{self}"
