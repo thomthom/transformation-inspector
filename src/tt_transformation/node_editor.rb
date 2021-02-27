@@ -13,6 +13,8 @@ require 'tt_transformation/nodes/view_transformation'
 module TT::Plugins::TransformationInspector
 class NodeEditor
 
+  SESSION_FILE_EXTENSION = '.nodes.json'.freeze
+
   attr_reader :nodes
 
   def initialize
@@ -445,17 +447,22 @@ class NodeEditor
 
   def save_session(dialog)
     title = "Save Nodes"
-    filter = "Nodes Sessions|*.nodes.json"
+    filter = "Nodes Sessions|*#{SESSION_FILE_EXTENSION}"
     response = UI.savepanel(title, nil, filter)
     return if response.nil?
 
-    puts "Write to: #{response}"
-    write(response, @nodes)
+    path = response
+    unless path.end_with?(SESSION_FILE_EXTENSION)
+      path = "#{path}#{SESSION_FILE_EXTENSION}"
+    end
+
+    puts "Write to: #{path}"
+    write(path, @nodes)
   end
 
   def load_session(dialog)
     title = "Save Nodes"
-    filter = "Nodes Sessions|*.nodes.json"
+    filter = "Nodes Sessions|*#{SESSION_FILE_EXTENSION}"
     response = UI.openpanel(title, nil, filter)
     return if response.nil?
 
