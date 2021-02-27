@@ -375,6 +375,12 @@ class NodeEditor
       data[:input].each { |connector_data|
         id = connector_data[:id]
         channel_id = connector_data[:channel_id].to_sym
+        unless node.class.input_channels.key?(channel_id)
+          # This can happen when reading old sessions files.
+          puts "Warning: Skipping input channel #{channel_id} for #{node.typename}"
+          next
+        end
+
         connections_map[id] = Connection.new(channel_id, node)
       }
 
@@ -384,7 +390,14 @@ class NodeEditor
     nodes_data.each { |data|
       node = nodes_map[data[:id]]
       data[:output].each { |output_data|
-        output = node.output(output_data[:channel_id].to_sym)
+        channel_id = output_data[:channel_id].to_sym
+        unless node.class.output_channels.key?(channel_id)
+          # This can happen when reading old sessions files.
+          puts "Warning: Skipping output channel #{channel_id} for #{node.typename}"
+          next
+        end
+
+        output = node.output(channel_id)
         output_data[:partners].each { |partner|
           connection = connections_map[partner]
           input = connection.node.input(connection.channel_id)
