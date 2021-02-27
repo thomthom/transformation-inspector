@@ -12,6 +12,11 @@ module TT::Plugins::TransformationInspector
     # @in [Geom::Transformation]
     input :transformation, "Transformation"
 
+    # @out [Geom::Transformation]
+    output :transformation, "Transformation" do
+      input(:transformation).data
+    end
+
     private
 
     def invalidate_cache
