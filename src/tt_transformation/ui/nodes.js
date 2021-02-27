@@ -403,12 +403,20 @@ const NodeEditor = {
     }
   },
   methods: {
-    newNode: function (item) {
+    newNode: function(item) {
       if (isSketchUp) {
         console.log('sketchup.new_node', item.id);
         sketchup.new_node(item.id);
       } else {
         console.info('TODO: new node:', item.id);
+      }
+    },
+    removeNode(node) {
+      if (isSketchUp) {
+        console.log('sketchup.remove_node', node.id);
+        sketchup.remove_node(node.id);
+      } else {
+        console.info('TODO: remove node:', node.id);
       }
     },
     saveSession: function () {

@@ -30,6 +30,7 @@
       <header @mousedown="nodeDragMouseDown">
         <div>{{ $filters.nodeType(node.type) }}<span class="debug"> ({{ node.id }})</span></div>
         <div class="label">{{ node.label }}</div>
+        <a href="#" class="button-close" title="Remove Node" @click.prevent="removeNode(node)">✖</a>
       </header>
 
       <!--

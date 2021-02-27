@@ -98,6 +98,9 @@ class NodeEditor
     dialog.add_action_callback('new_node') do |ctx, node_type|
       new_node(dialog, node_type)
     end
+    dialog.add_action_callback('remove_node') do |ctx, node_id|
+      remove_node(dialog, node_id)
+    end
     dialog.add_action_callback('save_session') do |ctx|
       save_session(dialog)
     end
@@ -295,6 +298,24 @@ class NodeEditor
     node = node_class.new
     @nodes << node
     update(dialog)
+  end
+
+  # @param [UI::HtmlDialog] dialog
+  # @param [Integer] node_id
+  def remove_node(dialog, node_id)
+    node = object_from_id(Node, node_id)
+    node.class.input_channels.each { |symbol, channel|
+      input = node.input(channel.id)
+      input.disconnect_from(input.partner) if input.partner
+    }
+    node.class.output_channels.each { |symbol, channel|
+      output = node.output(channel.id)
+      output.partners.each { |partner|
+        output.disconnect_from(partner) if partner
+      }
+    }
+    @nodes.delete(node)
+    update(dialog) # TODO: Use notifications
   end
 
   # @param [Class] klass

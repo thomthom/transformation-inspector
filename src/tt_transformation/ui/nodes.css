@@ -101,6 +101,23 @@ be of much use anyway.
 .node > header > .label {
   color: #aaa;
 }
+
+.node > header > .button-close {
+  text-decoration: none;
+  color: #ccc;
+  cursor: pointer;
+  position: absolute;
+  top: 3px;
+  right: 7px;
+  visibility: hidden;
+}
+.node > header > .button-close:hover {
+  color: #fff;
+}
+.node:hover > header > .button-close {
+  visibility: visible;
+}
+
 .node-watcher {
   display: none;
 }
