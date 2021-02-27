@@ -1,0 +1,341 @@
+[
+  {
+    "id": 720,
+    "type": "PointsNode",
+    "label": "Untitled",
+    "position": {
+      "x": 399.0,
+      "y": 9.0
+    },
+    "input": [
+
+    ],
+    "output": [
+      {
+        "id": 740,
+        "type": "OutputConnectionPoint",
+        "channel_id": "geom",
+        "node": 720,
+        "partners": [
+          440
+        ]
+      }
+    ],
+    "config": {
+      "points": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          9.0,
+          0.0,
+          0.0
+        ],
+        [
+          9.0,
+          9.0,
+          0.0
+        ],
+        [
+          0.0,
+          9.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  {
+    "id": 760,
+    "type": "TransformationNode",
+    "label": "Untitled",
+    "position": {
+      "x": 47.0,
+      "y": 197.0
+    },
+    "input": [
+      {
+        "id": 780,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 760,
+        "partner": null
+      }
+    ],
+    "output": [
+      {
+        "id": 800,
+        "type": "OutputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 760,
+        "partners": [
+          500
+        ]
+      }
+    ],
+    "config": {
+      "transformation": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  {
+    "id": 520,
+    "type": "TransformationNode",
+    "label": "Untitled",
+    "position": {
+      "x": 299.0,
+      "y": 199.0
+    },
+    "input": [
+      {
+        "id": 500,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 520,
+        "partner": 800
+      }
+    ],
+    "output": [
+      {
+        "id": 540,
+        "type": "OutputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 520,
+        "partners": [
+          560,
+          580
+        ]
+      }
+    ],
+    "config": {
+      "transformation": [
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  {
+    "id": 820,
+    "type": "TransformationNode",
+    "label": "Untitled",
+    "position": {
+      "x": 297.0,
+      "y": 489.0
+    },
+    "input": [
+      {
+        "id": 840,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 820,
+        "partner": null
+      }
+    ],
+    "output": [
+      {
+        "id": 860,
+        "type": "OutputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 820,
+        "partners": [
+
+        ]
+      }
+    ],
+    "config": {
+      "transformation": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        10.0,
+        20.0,
+        30.0,
+        1.0
+      ]
+    }
+  },
+  {
+    "id": 460,
+    "type": "TransformNode",
+    "label": "Untitled",
+    "position": {
+      "x": 595.0,
+      "y": 129.0
+    },
+    "input": [
+      {
+        "id": 440,
+        "type": "InputConnectionPoint",
+        "channel_id": "geom",
+        "node": 460,
+        "partner": 740
+      },
+      {
+        "id": 560,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 460,
+        "partner": 540
+      }
+    ],
+    "output": [
+      {
+        "id": 480,
+        "type": "OutputConnectionPoint",
+        "channel_id": "geom",
+        "node": 460,
+        "partners": [
+          620,
+          660
+        ]
+      }
+    ],
+    "config": {
+    }
+  },
+  {
+    "id": 640,
+    "type": "DrawPointsNode",
+    "label": "Untitled",
+    "position": {
+      "x": 844.0,
+      "y": 27.0
+    },
+    "input": [
+      {
+        "id": 620,
+        "type": "InputConnectionPoint",
+        "channel_id": "geom",
+        "node": 640,
+        "partner": 480
+      }
+    ],
+    "output": [
+
+    ],
+    "config": {
+      "mode": 7,
+      "color": [
+        0,
+        165,
+        0,
+        128
+      ],
+      "line_width": 2,
+      "stipple": ""
+    }
+  },
+  {
+    "id": 600,
+    "type": "ViewTransformationNode",
+    "label": "Untitled",
+    "position": {
+      "x": 572.0,
+      "y": 486.0
+    },
+    "input": [
+      {
+        "id": 580,
+        "type": "InputConnectionPoint",
+        "channel_id": "transformation",
+        "node": 600,
+        "partner": 540
+      }
+    ],
+    "output": [
+
+    ],
+    "config": {
+      "transformation": [
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        0.0,
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  {
+    "id": 680,
+    "type": "DrawPointsNode",
+    "label": "Untitled",
+    "position": {
+      "x": 845.0,
+      "y": 356.0
+    },
+    "input": [
+      {
+        "id": 660,
+        "type": "InputConnectionPoint",
+        "channel_id": "geom",
+        "node": 680,
+        "partner": 480
+      }
+    ],
+    "output": [
+
+    ],
+    "config": {
+      "mode": 2,
+      "color": [
+        0,
+        100,
+        0,
+        255
+      ],
+      "line_width": 2,
+      "stipple": ""
+    }
+  }
+]
