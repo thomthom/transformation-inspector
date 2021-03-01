@@ -47,8 +47,6 @@ class NodeEditor
 
   private
 
-  NAMESPACE = TT::Plugins::TransformationInspector
-
   def updating?
     @updating
   end
@@ -144,6 +142,7 @@ class NodeEditor
         # raise
         p error
         puts error.backtrace.join("\n")
+        UI.beep
       end
     end
 
@@ -213,8 +212,8 @@ class NodeEditor
   end
 
   def update_node_types(dialog)
-    names = NAMESPACE.constants.grep(/\w+Node$/)
-    klasses = names.map { |name| NAMESPACE.const_get(name) }
+    names = Nodes.constants.grep(/\w+Node$/)
+    klasses = names.map { |name| Nodes.const_get(name) }
     # labels = klasses.map { |klass| class.name[0,-4] }
     types = []
     klasses.each { |klass|
@@ -294,9 +293,7 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   # @param [String] node_type
   def new_node(dialog, node_type)
-    # TODO: move nodes to Nodes namespace
-    # node_class = Nodes.const_get(node_type)
-    node_class = NAMESPACE.const_get(node_type)
+    node_class = Nodes.const_get(node_type)
     node = node_class.new
     @nodes << node
     update(dialog)
@@ -368,7 +365,7 @@ class NodeEditor
     # First recreate all the nodes without the connections.
     nodes = nodes_data.map { |data|
       type = data[:type].to_sym
-      klass = TT::Plugins::TransformationInspector.const_get(type)
+      klass = Nodes.const_get(type)
       node = klass.deserialize(data)
       node.position = Geom::Point2d.new(*data[:position].values)
       node.label = data[:label]
@@ -417,28 +414,28 @@ class NodeEditor
       Geom::Point3d.new(9, 9, 0),
       Geom::Point3d.new(0, 9, 0),
     ]
-    points_node = PointsNode.new(points: points)
+    points_node = Nodes::PointsNode.new(points: points)
     points_node.position = Geom::Point2d.new(400, 10)
 
     tr1 = Geom::Transformation.scaling(1,2,3)
-    tr_node1 = TransformationNode.new(transformation: tr1)
+    tr_node1 = Nodes::TransformationNode.new(transformation: tr1)
     tr_node1.position = Geom::Point2d.new(50, 200)
 
     tr2 = Geom::Transformation.new(ORIGIN, Y_AXIS)
-    tr_node2 = TransformationNode.new(transformation: tr2)
+    tr_node2 = Nodes::TransformationNode.new(transformation: tr2)
     tr_node2.position = Geom::Point2d.new(300, 200)
     tr_node2.input(:transformation).connect_to(tr_node1.output(:transformation))
 
-    transform1_node = TransformNode.new
+    transform1_node = Nodes::TransformNode.new
     transform1_node.position = Geom::Point2d.new(600, 130)
     transform1_node.input(:geom).connect_to(points_node.output(:geom))
     transform1_node.input(:transformation).connect_to(tr_node2.output(:transformation))
 
     tr3 = Geom::Transformation.new(Geom::Point3d.new(10, 20, 30))
-    tr_node3 = TransformationNode.new(transformation: tr3)
+    tr_node3 = Nodes::TransformationNode.new(transformation: tr3)
     tr_node3.position = Geom::Point2d.new(300, 300)
 
-    draw_node = DrawPointsNode.new
+    draw_node = Nodes::DrawPointsNode.new
     draw_node.position = Geom::Point2d.new(850, 30)
     draw_node.input(:geom).connect_to(transform1_node.output(:geom))
 

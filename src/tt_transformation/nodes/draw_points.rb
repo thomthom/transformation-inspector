@@ -2,6 +2,7 @@ require 'tt_transformation/constants/view'
 require 'tt_transformation/nodes/node'
 
 module TT::Plugins::TransformationInspector
+module Nodes
   class DrawPointsNode < Node
 
     include ViewConstants
@@ -74,4 +75,5 @@ module TT::Plugins::TransformationInspector
     end
 
   end # class Node
+end # module Nodes
 end

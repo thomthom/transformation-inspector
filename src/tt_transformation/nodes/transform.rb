@@ -1,6 +1,7 @@
 require 'tt_transformation/nodes/node'
 
 module TT::Plugins::TransformationInspector
+module Nodes
   class TransformNode < Node
 
     # @param [Hash] data
@@ -31,4 +32,5 @@ module TT::Plugins::TransformationInspector
     end
 
   end # class Node
+end # module Nodes
 end

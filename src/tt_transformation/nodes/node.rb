@@ -3,6 +3,7 @@ require 'json'
 require 'tt_transformation/nodes/notification_manager'
 
 module TT::Plugins::TransformationInspector
+module Nodes
   class Node
 
     class Error < StandardError; end
@@ -360,4 +361,5 @@ module TT::Plugins::TransformationInspector
     end
 
   end # class Node
+end # module Nodes
 end

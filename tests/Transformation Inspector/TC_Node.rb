@@ -9,7 +9,7 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      pts_node = PointsNode.new(points: points1)
+      pts_node = Nodes::PointsNode.new(points: points1)
       assert_equal(points1, pts_node.output(:geom).data)
 
       points2 = [
@@ -26,13 +26,13 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      pts_node = PointsNode.new(points: points)
+      pts_node = Nodes::PointsNode.new(points: points)
       assert_equal(points, pts_node.output(:geom).data)
 
       tr1 = Geom::Transformation.scaling(1, 2, 3)
-      tr1_node = TransformationNode.new(transformation: tr1)
+      tr1_node = Nodes::TransformationNode.new(transformation: tr1)
 
-      transform1_node = TransformNode.new
+      transform1_node = Nodes::TransformNode.new
       transform1_node.input(:transformation).connect_to(tr1_node.output(:transformation))
       transform1_node.input(:geom).connect_to(pts_node.output(:geom))
 
@@ -50,17 +50,17 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      pts_node = PointsNode.new(points: points1)
+      pts_node = Nodes::PointsNode.new(points: points1)
 
       tr1 = Geom::Transformation.scaling(1,2,3)
-      tr1_node = TransformationNode.new(transformation: tr1)
+      tr1_node = Nodes::TransformationNode.new(transformation: tr1)
 
       tr2 = Geom::Transformation.new(ORIGIN, Y_AXIS)
-      tr2_node = TransformationNode.new(transformation: tr2)
+      tr2_node = Nodes::TransformationNode.new(transformation: tr2)
 
       tr2_node.input(:transformation).connect_to(tr1_node.output(:transformation))
 
-      transform1_node = TransformNode.new
+      transform1_node = Nodes::TransformNode.new
       transform1_node.input(:geom).connect_to(pts_node.output(:geom))
       transform1_node.input(:transformation).connect_to(tr2_node.output(:transformation))
 
@@ -84,12 +84,12 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      pts_node = PointsNode.new(points: points)
+      pts_node = Nodes::PointsNode.new(points: points)
 
       tr1 = Geom::Transformation.scaling(1, 2, 3)
-      tr1_node = TransformationNode.new(transformation: tr1)
+      tr1_node = Nodes::TransformationNode.new(transformation: tr1)
 
-      transform1_node = TransformNode.new
+      transform1_node = Nodes::TransformNode.new
       transform1_node.input(:transformation).connect_to(tr1_node.output(:transformation))
       transform1_node.input(:geom).connect_to(pts_node.output(:geom))
 

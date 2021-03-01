@@ -9,9 +9,9 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      node = PointsNode.new(points: points)
+      node = Nodes::PointsNode.new(points: points)
       result = node.output(:geom)
-      assert_kind_of(Node::OutputConnectionPoint, result)
+      assert_kind_of(Nodes::Node::OutputConnectionPoint, result)
     end
 
     def test_output_geom_data
@@ -19,7 +19,7 @@ module Tests
         Geom::Point3d.new(1, 2, 3),
         Geom::Point3d.new(4, 5, 6),
       ]
-      node = PointsNode.new(points: points)
+      node = Nodes::PointsNode.new(points: points)
       assert_equal(points, node.output(:geom).data)
     end
 
