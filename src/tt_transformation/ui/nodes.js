@@ -419,6 +419,25 @@ const NodeEditor = {
         console.info('TODO: remove node:', node.id);
       }
     },
+    renameNode(event) {
+      console.log('renameNode', event.target.value);
+      const input = event.target;
+      input.blur();
+
+      // TODO: Refactor into getNodeFromElement
+      const nodeElement = input.closest('.node');
+      const nodeId = parseInt(nodeElement.dataset.nodeId);
+      const node = this.getNodeById(nodeId);
+
+      node.label = input.value;
+      this.sync_label(node);
+    },
+    nodeStartRename(event) {
+      console.log('nodeStartRename', event.target);
+      const input = event.target;
+      input.focus();
+      input.select();
+    },
     saveSession: function () {
       console.log('Save session');
       if (isSketchUp) {
@@ -486,14 +505,23 @@ const NodeEditor = {
         });
       }
     },
-    sync_position: function (node) {
+    sync_label(node) {
+      // TODO: Only sync if label changes.
+      if (this.updating) return;
+      if (isSketchUp) {
+        console.log('sketchup.sync_label', node.id, node.label);
+        sketchup.sync_label(node.id, node.label);
+      }
+    },
+    sync_position(node) {
+      // TODO: Only sync if position changes.
       if (this.updating) return;
       if (isSketchUp) {
         console.log('sketchup.sync_position', node.id, node.position);
         sketchup.sync_position(node.id, [node.position.x, node.position.y]);
       }
     },
-    sync_transformation: function (nodeId, transformation) {
+    sync_transformation(nodeId, transformation) {
       // console.log('sketchup.sync_transformation', nodeId);
       // console.log('arguments', arguments);
       if (this.updating) return;
@@ -502,7 +530,7 @@ const NodeEditor = {
         sketchup.sync_transformation(nodeId, transformation);
       }
     },
-    sync_draw_config: function (nodeId, key, value) {
+    sync_draw_config(nodeId, key, value) {
       // console.log('sketchup.sync_draw_config', nodeId, key, value);
       // console.log('arguments', arguments);
       if (this.updating) return;
@@ -917,8 +945,8 @@ const NodeEditor = {
       document.addEventListener('mousemove', this.nodeDrag, { capture: true });
       document.addEventListener('mouseup', this.nodeEndDrag, { capture: true, once: true });
 
-      const node_element = event.target.closest('section.node');
-      const nodeId = parseInt(node_element.dataset.nodeId);
+      const nodeElement = event.target.closest('.node');
+      const nodeId = parseInt(nodeElement.dataset.nodeId);
       this.drag.node = this.getNodeById(nodeId);
     },
     nodeDrag: function (event) {

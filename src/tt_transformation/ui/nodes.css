@@ -98,8 +98,23 @@ be of much use anyway.
   padding: 3px 10px;
   margin: -5px -5px 5px -5px;
 }
+
 .node > header > .label {
   color: #aaa;
+}
+.node > header > .label input {
+  display: block;
+  width: 100%;
+  color: #aaa;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.node > header > .label input:focus {
+  color: #333;
+  background: #ccc;
+  outline-color: orange;
 }
 
 .node > header > .button-close {

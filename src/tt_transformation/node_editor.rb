@@ -86,6 +86,9 @@ class NodeEditor
     dialog.add_action_callback('disconnect') do |ctx, input_id, output_id|
       disconnect(dialog, input_id, output_id)
     end
+    dialog.add_action_callback('sync_label') do |ctx, node_id, label|
+      sync_label(dialog, node_id, label)
+    end
     dialog.add_action_callback('sync_position') do |ctx, node_id, position|
       sync_position(dialog, node_id, Geom::Point2d.new(*position))
     end
@@ -222,6 +225,17 @@ class NodeEditor
     types.sort! { |a, b| a[:label] <=> b[:label] }
     types_json = JSON.pretty_generate(types)
     dialog.execute_script("updateNodeTypes(#{types_json})")
+  end
+
+  # @param [UI::HtmlDialog] dialog
+  # @param [Integer] node_id
+  # @param [Geom::Point2d] position
+  def sync_label(dialog, node_id, label)
+    return if updating?
+    puts "sync_label #{node_id}: #{label}"
+    # @type [Nodes::Node]
+    node = object_from_id(Nodes::Node, node_id)
+    node.label = label
   end
 
   # @param [UI::HtmlDialog] dialog
