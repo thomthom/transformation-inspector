@@ -18,7 +18,7 @@ class NodeEditor
   attr_reader :nodes
 
   def initialize
-    # @type [Array<Node>]
+    # @type [Array<Nodes::Node>]
     @nodes = []
 
     # @type [UI::HtmlDialog]
@@ -230,8 +230,8 @@ class NodeEditor
   def sync_position(dialog, node_id, position)
     return if updating?
     puts "sync_position #{node_id}: #{position.inspect}"
-    # @type [Node]
-    node = object_from_id(Node, node_id)
+    # @type [Nodes::Node]
+    node = object_from_id(Nodes::Node, node_id)
     node.position = position
   end
 
@@ -262,10 +262,10 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   def connect(dialog, input_id, output_id)
     puts "Connect #{input_id} to #{output_id}"
-    # @type [Node::InputConnectionPoint]
-    input = object_from_id(Node::InputConnectionPoint, input_id)
-    # @type [Node::OutputConnectionPoint]
-    output = object_from_id(Node::OutputConnectionPoint, output_id)
+    # @type [Nodes::Node::InputConnectionPoint]
+    input = object_from_id(Nodes::Node::InputConnectionPoint, input_id)
+    # @type [Nodes::Node::OutputConnectionPoint]
+    output = object_from_id(Nodes::Node::OutputConnectionPoint, output_id)
     p input
     p output
     input.connect_to(output)
@@ -280,10 +280,10 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   def disconnect(dialog, input_id, output_id)
     puts "Disconnect #{input_id} to #{output_id}"
-    # @type [Node::InputConnectionPoint]
-    input = object_from_id(Node::InputConnectionPoint, input_id)
-    # @type [Node::OutputConnectionPoint]
-    output = object_from_id(Node::OutputConnectionPoint, output_id)
+    # @type [Nodes::Node::InputConnectionPoint]
+    input = object_from_id(Nodes::Node::InputConnectionPoint, input_id)
+    # @type [Nodes::Node::OutputConnectionPoint]
+    output = object_from_id(Nodes::Node::OutputConnectionPoint, output_id)
     p input
     p output
     input.disconnect_from(output)
@@ -302,7 +302,7 @@ class NodeEditor
   # @param [UI::HtmlDialog] dialog
   # @param [Integer] node_id
   def remove_node(dialog, node_id)
-    node = object_from_id(Node, node_id)
+    node = object_from_id(Nodes::Node, node_id)
     node.class.input_channels.each { |symbol, channel|
       input = node.input(channel.id)
       input.disconnect_from(input.partner) if input.partner
@@ -331,7 +331,7 @@ class NodeEditor
   end
 
   # @param [String] path
-  # @return [Array<Node>]
+  # @return [Array<Nodes::Node>]
   def read(path)
     json = File.read(path, encoding: 'utf-8')
     data = JSON.parse(json, symbolize_names: true)
@@ -339,7 +339,7 @@ class NodeEditor
   end
 
   # @param [String] path
-  # @param [Array<Node>] nodes
+  # @param [Array<Nodes::Node>] nodes
   def write(path, nodes)
     data = serialize_nodes(nodes)
     json = JSON.pretty_generate(data)
@@ -347,7 +347,7 @@ class NodeEditor
     nil
   end
 
-  # @param [Array<Node>] nodes
+  # @param [Array<Nodes::Node>] nodes
   # @return [Array<Hash>]
   def serialize_nodes(nodes)
     nodes.map(&:to_h)
@@ -356,9 +356,9 @@ class NodeEditor
   Connection = Struct.new(:channel_id, :node)
 
   # @param [Array<Hash>] data
-  # @return [Array<Node>]
+  # @return [Array<Nodes::Node>]
   def deserialize_nodes(nodes_data)
-    # @type [Hash{Integer => Node}] Node id to Node
+    # @type [Hash{Integer => Nodes::Node}] Node id to Nodes::Node
     nodes_map = {}
     # @type [Hash{Integer => Connection}] Node id to Connection
     connections_map = {}
