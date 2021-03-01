@@ -3,7 +3,7 @@ require 'json'
 
 require 'tt_transformation/nodes/notification_manager'
 
-require 'tt_transformation/nodes/draw_points'
+require 'tt_transformation/nodes/draw_geom'
 require 'tt_transformation/nodes/node'
 require 'tt_transformation/nodes/points'
 require 'tt_transformation/nodes/transform'
@@ -253,8 +253,8 @@ class NodeEditor
   def sync_draw_config(dialog, node_id, key, value)
     return if updating?
     puts "sync_draw_config(#{key}, node: #{node_id}, value: #{value.inspect})"
-    # @type [DrawPointsNode]
-    node = object_from_id(DrawPointsNode, node_id)
+    # @type [DrawGeomNode]
+    node = object_from_id(DrawGeomNode, node_id)
     node.set_config(key, value)
     Sketchup.active_model.active_view.invalidate
   end
@@ -435,7 +435,7 @@ class NodeEditor
     tr_node3 = Nodes::TransformationNode.new(transformation: tr3)
     tr_node3.position = Geom::Point2d.new(300, 300)
 
-    draw_node = Nodes::DrawPointsNode.new
+    draw_node = Nodes::DrawGeomNode.new
     draw_node.position = Geom::Point2d.new(850, 30)
     draw_node.input(:geom).connect_to(transform1_node.output(:geom))
 

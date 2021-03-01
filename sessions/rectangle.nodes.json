@@ -184,7 +184,7 @@
   },
   {
     "id": 3740,
-    "type": "DrawPointsNode",
+    "type": "DrawGeomNode",
     "label": "Untitled",
     "position": {
       "x": 970.0,
@@ -282,7 +282,7 @@
   },
   {
     "id": 3820,
-    "type": "DrawPointsNode",
+    "type": "DrawGeomNode",
     "label": "Untitled",
     "position": {
       "x": 1217.0,

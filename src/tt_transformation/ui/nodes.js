@@ -247,7 +247,7 @@ const testNodes = [
   },
   {
     "id": 600,
-    "type": "DrawPointsNode",
+    "type": "DrawGeomNode",
     "label": "Untitled",
     "position": {
       "x": 896.0,
@@ -1125,7 +1125,7 @@ app.component('PointsNode', {
 // CEF used by SketchUp doesn't fully support color input type.
 const supportColorPicker = !isSketchUp || (isSketchUp && chrome_version >= 88);
 
-app.component('DrawPointsNode', {
+app.component('DrawGeomNode', {
   props: ['node', 'config'],
   data() {
     return {
