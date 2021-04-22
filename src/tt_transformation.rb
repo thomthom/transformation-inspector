@@ -19,7 +19,7 @@ module TT
   # Plugin information
   PLUGIN_ID       = 'TT_Transformation'.freeze
   PLUGIN_NAME     = 'Transformation Inspector'.freeze
-  PLUGIN_VERSION  = '1.1.1'.freeze
+  PLUGIN_VERSION  = '1.2.1'.freeze
 
   # Resource paths
   FILENAMESPACE = File.basename( __FILE__, '.rb' )
@@ -35,7 +35,7 @@ module TT
     ex = SketchupExtension.new( PLUGIN_NAME, loader )
     ex.description = 'Inspect and modify the transformation matrix directly.'
     ex.version     = PLUGIN_VERSION
-    ex.copyright   = 'Thomas Thomassen © 2012–2013'
+    ex.copyright   = 'Thomas Thomassen © 2012–2021'
     ex.creator     = 'Thomas Thomassen (thomas@thomthom.net)'
     Sketchup.register_extension( ex, true )
   end
