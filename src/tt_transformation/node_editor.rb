@@ -267,8 +267,8 @@ class NodeEditor
   def sync_draw_config(dialog, node_id, key, value)
     return if updating?
     puts "sync_draw_config(#{key}, node: #{node_id}, value: #{value.inspect})"
-    # @type [DrawGeomNode]
-    node = object_from_id(DrawGeomNode, node_id)
+    # @type [Nodes::DrawGeomNode]
+    node = object_from_id(Nodes::DrawGeomNode, node_id)
     node.set_config(key, value)
     Sketchup.active_model.active_view.invalidate
   end
