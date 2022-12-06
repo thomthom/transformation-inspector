@@ -1,6 +1,8 @@
 require 'tt_transformation/transformation_helper'
 require 'tt_transformation/instance'
 
+require 'json'
+
 module TT::Plugins::TransformationInspector
 
   unless file_loaded?(__FILE__)
