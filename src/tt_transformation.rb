@@ -19,7 +19,7 @@ module TT
   # Plugin information
   PLUGIN_ID       = 'TT_Transformation'.freeze
   PLUGIN_NAME     = 'Transformation Inspector'.freeze
-  PLUGIN_VERSION  = '1.2.2'.freeze
+  PLUGIN_VERSION  = '1.2.3'.freeze
 
   # Resource paths
   FILENAMESPACE = File.basename( __FILE__, '.rb' )
