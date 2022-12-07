@@ -12,6 +12,8 @@ module TT::Plugins::TransformationInspector
     cmd = UI::Command.new('Transformation Inspector') do
       self.inspect_transformation
     end
+    cmd.tooltip= cmd.menu_text
+    cmd.status_bar_text= 'Inspect and modify the transformation matrix of an instance.'
     cmd.large_icon = File.join(images_path, "inspector.#{ext}")
     cmd.small_icon = cmd.large_icon
     cmd_inspector = cmd
