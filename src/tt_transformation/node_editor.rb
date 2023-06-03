@@ -252,8 +252,8 @@ class NodeEditor
   def sync_transformation(dialog, node_id, transformation)
     return if updating?
     puts "sync_transformation #{node_id}: #{transformation.inspect}"
-    # @type [TransformationNode]
-    node = object_from_id(TransformationNode, node_id)
+    # @type [Nodes::TransformationNode]TransformationNode
+    node = object_from_id(Nodes::TransformationNode, node_id)
     tr = Geom::Transformation.new(transformation)
     node.set_config(:transformation, tr)
     # TODO: trigger output update
