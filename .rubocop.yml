@@ -1,4 +1,6 @@
-require: rubocop-sketchup
+require:
+- rubocop-minitest
+- rubocop-sketchup
 
 # If you want to use the same codding pattern as SketchUp's projects, enable
 # the next line. RuboCop will then use the coding pattern from the
@@ -19,12 +21,12 @@ AllCops:
   - research/**/*
   SketchUp:
     SourcePath: src
-    TargetSketchUpVersion: 2014
+    TargetSketchUpVersion: 2018
     Exclude: # Exclude common folders.
     - profiling/**/*
     - skippy/**/*
     - tests/**/*
-  TargetRubyVersion: 2.5 # Should have been 2.0 but RuboCop dropped support.
+  TargetRubyVersion: 2.7
 
 
 # If DisabledByDefault is set to true then we need to enable the SketchUp
@@ -44,3 +46,12 @@ SketchupSuggestions:
 
 SketchupBugs:
   Enabled: true
+
+
+Lint/DeprecatedClassMethods:
+  Enabled: true
+
+SketchupPerformance/Typename:
+  Exclude:
+  - src/tt_transformation/nodes/node.rb
+  - src/tt_transformation/node_editor.rb
