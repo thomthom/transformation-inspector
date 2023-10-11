@@ -134,7 +134,7 @@ class NodeEditor
   def restore_session
     return unless @nodes.empty?
 
-    if File.exists?(last_session_path)
+    if File.exist?(last_session_path)
       puts "restoring session..."
       begin
         @nodes = read(last_session_path)
@@ -165,7 +165,7 @@ class NodeEditor
   end
 
   def clear_last_session
-    if File.exists?(last_session_path)
+    if File.exist?(last_session_path)
       File.delete(last_session_path)
     end
     nil
